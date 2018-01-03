@@ -121,6 +121,7 @@ class FileManager {
 	public $enableMove;
 	public $enableCopy;
 	public $enableNewDir;
+	public $enableCreateFile;
 	public $enableSearch;
 	public $createBackups;
 	public $replSpacesUpload;
@@ -144,6 +145,9 @@ class FileManager {
 	public $smartRefresh;
 	public $quota;
 	public $customAction;
+	public $adminTheme;
+	public $isWin;
+	public $hideFileCnt;
 
 	/**
 	 * HTML container name
@@ -273,6 +277,7 @@ class FileManager {
 
 		if($rootDir != '') $this->rootDir = $rootDir;
 		if($this->fmWebPath == '') $this->fmWebPath = FM_Tools::getWebPath();
+		$this->isWin = defined('PHP_WINDOWS_VERSION_BUILD');
 	}
 
 	/**
@@ -435,15 +440,6 @@ class FileManager {
 			if($create && !is_dir($dir)) FM_Tools::makeDir($dir);
 		}
 		return $dir;
-	}
-
-	/**
-	 * get path to icons
-	 *
-	 * @return string
-	 */
-	public function getIconDir() {
-		return $this->_incPath . '/icn';
 	}
 
 	/**
@@ -622,7 +618,7 @@ class FileManager {
 /* PROTECTED METHODS *************************************************************************** */
 
 	/**
-	 * view header
+	 * view header - container with titlebar and explorer table
 	 */
 	protected function _viewHeader() {
 		$fmWidth = strstr($this->fmWidth, '%') ? $this->fmWidth : (int) $this->fmWidth . 'px';
@@ -630,12 +626,13 @@ class FileManager {
 		$expWidth = strstr($this->explorerWidth, '%') ? $this->explorerWidth : (int) $this->explorerWidth;
 		$listWidth = strstr($this->explorerWidth, '%') ? 100 - (int) $this->explorerWidth . '%' : '';
 
-		print "<div id=\"$this->container\" class=\"fmTH1\" onMouseOver=\"fmLib.setContMenu(false)\" onMouseOut=\"fmLib.setContMenu(true)\" ";
-		print "style=\"position:relative; width:$fmWidth; height:$fmHeight; padding:1px; margin:{$this->fmMargin}px\">\n";
-		if(!$this->hideTitleBar) print "<div id=\"$this->_titleCont\" class=\"fmTH1\" style=\"height:25px; overflow:hidden\"></div>\n";
-		print "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\"><tr>\n";
-		if($this->explorerWidth) print "<td width=\"$expWidth\"><div id=\"$this->_expCont\" class=\"fmTD2\"></div></td>\n";
-		print "<td width=\"$listWidth\"><div id=\"$this->_listCont\" class=\"fmTD1\" style=\"overflow:auto\"></div></td>\n";
+		print "<div id='$this->container' class='fmCont' onMouseOver='fmLib.setContMenu(false)' onMouseOut='fmLib.setContMenu(true)' ";
+		print "style='width:$fmWidth; height:$fmHeight; margin:{$this->fmMargin}px;'>\n";
+		//if(!$this->hideTitleBar) print "<div id='$this->_titleCont' class='fmContTitle'>File Manager: enumerating files ...</div>\n";
+		if(!$this->hideTitleBar) print "<div id='$this->_titleCont' class='fmContTitle'>File Manager <span class='spinner'><span class='bounce1'></span><span class='bounce2'></span><span class='bounce3'></span></span></div>\n";
+		print "<table class='fmContTable' border='0' cellspacing='0' cellpadding='0' width='100%'><tr>\n";
+		if($this->explorerWidth) print "<td class='fmContTableLeft' width='$expWidth'><div id='$this->_expCont' class='fmContTableExp fmxTD2'></div></td>\n";
+		print "<td class='fmContTableRight' width='$listWidth'><div id='$this->_listCont' class='fmContTableList' style='overflow:auto'></div></td>\n";
 		print "</tr></table>\n";
 	}
 
@@ -658,10 +655,12 @@ class FileManager {
 			print "style=\"width:$fmWidth; height:150px; overflow:auto; margin:{$this->fmMargin}; margin-top:10px\">";
 			print "</div>\n";
 		}
-		$url = $this->fmWebPath . '/action.php?fmContainer=' . $this->container;
+		$url = '?action&fmContainer=' . $this->container;
 		$mode = ($this->startSearch != '') ? 'search&fmName=' . addslashes($this->startSearch) : 'refresh';
 		print "<script type=\"text/javascript\">\n";
-		print "fmLib.initFileManager('$url', '$mode');\n";
+		print "fmUrl = '$url';\n";
+		print "fmMode = '$mode';\n";
+		//print "fmLib.initFileManager('$url', '$mode');\n"; //MP init is in ProcessFileManager.js
 		print "</script>\n";
 	}
 

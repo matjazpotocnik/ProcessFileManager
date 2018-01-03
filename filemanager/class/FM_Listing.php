@@ -111,9 +111,9 @@ class FM_Listing {
 	 * @return boolean
 	 */
 	public function view() {
+
 		if($this->searchString != '') {
 			$this->_folderId = 'search';
-			/* do not cache search results! */
 			unset($this->_entries[$this->_folderId]);
 		}
 		else $this->_folderId = md5($this->curDir);
@@ -137,7 +137,7 @@ class FM_Listing {
 			$items[] = $this->_viewDirUp();
 		}
 
-		if(is_array($this->_entries[$this->_folderId])) {
+		if(isset($this->_entries[$this->_folderId]) && is_array($this->_entries[$this->_folderId])) {
 			foreach($this->_entries[$this->_folderId] as $Entry) {
 				$items[] = $Entry->view();
 			}
@@ -419,7 +419,8 @@ class FM_Listing {
 		}
 		if(!$this->isAllowedDir($dir)) return false;
 
-		$list = $this->FileSystem->readDir($dir);
+		$list = $this->FileSystem->readDir($dir); //MP to
+		//MP to precita samo trenutni dir
 
 		if(!is_array($list)) {
 			if($this->curDir != $rootDir) {
@@ -493,7 +494,7 @@ class FM_Listing {
 	 */
 	protected function _viewDirUp() {
 		$Entry = new FM_Entry($this);
-		$Entry->icon = 'bullet_arrow_up';
+		$Entry->icon = 'fmIconDirUp';
 		$Entry->type = 'cdup';
 		$Entry->name = ($this->searchString == '') ? '..' : '';
 		return $Entry->view();
@@ -626,7 +627,7 @@ class FM_Listing {
 		if(!in_array('owner', $this->FileManager->hideColumns)) $items[] = 'owner';
 		if(!in_array('group', $this->FileManager->hideColumns)) $items[] = 'group';
 		$cont = $this->FileManager->container;
-		$icon = 'menu.gif';
+		$icon = 'fmIconMenu';
 		$tooltip = addslashes(FM_Tools::getMsg('cmdSelAction'));
 		$style = 'cursor:pointer';
 		$action = "exec:['fmLib.viewMenu','bulkAction','$cont']";

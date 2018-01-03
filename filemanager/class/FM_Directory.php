@@ -51,9 +51,11 @@ class FM_Directory extends FM_FileBase {
 	/**
 	 * read directory
 	 *
+	 * @param boolean $all return all attributes for a folder/file (for better performance) //MP
 	 * @return mixed	directory entries or false on failure
 	 */
-	public function read() {
+	public function read($all = true) {
+		//$this->_FileManager->Log->add("directory->read all=$all"); //MP
 		if($this->_ftp) {
 			if($this->_path == '/' || $this->_path == '.') {
 				$list = @ftp_rawlist($this->_ftp, $this->_path);
@@ -66,15 +68,13 @@ class FM_Directory extends FM_FileBase {
 				else return false;
 			}
 			else return false;
-		}
-		else if($dp = @opendir($this->_path)) {
+		} else if($dp = @opendir($this->_path)) {
 			$list = array();
 			while(($file = @readdir($dp)) !== false) {
 				$list[] = $this->_path . '/' . $file;
 			}
 			@closedir($dp);
-		}
-		else return false;
+		} else return false;
 
 		if(is_array($list)) {
 			$newList = array();
@@ -95,8 +95,7 @@ class FM_Directory extends FM_FileBase {
 						$item['changed'] = ($tstamp > 0) ? @strftime($this->_FileManager->dateTimeFormat, $tstamp) : $m[5];
 						$item['name'] = $m[7];
 						$item['target'] = '';
-					}
-					else if(preg_match(FM_FileSystem::WINDOWS_ROW, $file, $m)) {
+					} else if(preg_match(FM_FileSystem::WINDOWS_ROW, $file, $m)) {
 						if($m[4] == '..' || $m[4] == '.') continue;
 						$t = explode(':', $m[2]);
 						if(preg_match('/[AP]M$/', strtoupper($t[1]), $m2)) {
@@ -106,12 +105,10 @@ class FM_Directory extends FM_FileBase {
 						if(strstr($m[1], '-')) {
 							$d = explode('-', $m[1]);
 							$tstamp = mktime($t[0], $t[1], 0, $d[0], $d[1], $d[2]);
-						}
-						else if(strstr($m[1], '.')) {
+						} else if(strstr($m[1], '.')) {
 							$d = explode('.', $m[1]);
 							$tstamp = mktime($t[0], $t[1], 0, $d[1], $d[0], $d[2]);
-						}
-						else {
+						} else {
 							$tstamp = @strtotime($m[1] . ' ' . $m[2]);
 						}
 						$item['isDir'] = (strtoupper($m[3]) == '<DIR>');
@@ -123,18 +120,28 @@ class FM_Directory extends FM_FileBase {
 						$item['name'] = $m[4];
 						$item['target'] = '';
 					}
-				}
-				else {
+				} else {
 					$filename = FM_Tools::basename($file);
 					if($filename == '..' || $filename == '.') continue;
+					// isDir, size, name, path and isDeleted are required attributes for FM_Explorer //MP
 					$item['isDir'] = is_dir($file);
-					$item['owner'] = @fileowner($file);
-					$item['group'] = @filegroup($file);
 					$item['size'] = @filesize($file);
-					$item['changed'] = @strftime($this->_FileManager->dateTimeFormat, @filemtime($file));
 					$item['name'] = $filename;
-					$item['permissions'] = FM_Tools::getPermissions($this->_path . '/' . $item['name']);
-					$item['target'] = is_link($file) ? @realpath($file) : '';
+					if($all) {
+						$item['changed'] = @strftime($this->_FileManager->dateTimeFormat, @filemtime($file));
+						if(defined('PHP_WINDOWS_VERSION_BUILD')) {
+							$item['target'] = '';
+							$item['group'] = '';
+							$item['owner'] = '';
+							$item['permissions'] = FM_Tools::getPermissionsWin($this->_path . '/' . $item['name'], $item['isDir']); //MP
+							//$item['permissions'] = FM_Tools::getPermissions($this->_path . '/' . $item['name']);
+						} else {
+							$item['target'] = is_link($file) ? @realpath($file) : '';
+							$item['group'] = @filegroup($file);
+							$item['owner'] = @fileowner($file);
+							$item['permissions'] = FM_Tools::getPermissions($this->_path . '/' . $item['name']);
+						}
+					}
 				}
 				$item['path'] = $this->_path . '/' . $item['name'];
 				$item['isDeleted'] = preg_match('/\.' . FM_EXT_DELETED . '$/', $item['name']);

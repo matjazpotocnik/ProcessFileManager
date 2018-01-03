@@ -11,6 +11,60 @@ var fmParser = {
 	videoFiles: /\.(swf|flv|mp4|webm|ogv)$/i,
 	mediaCnt: 0,
 
+	makeBreadcrumbs: function(path, url) {
+		var crumbsep = " / ";
+		var displayname, allbread, path_ar, p;
+
+		if(path.charAt(path.length - 1) == "/") {
+			//remove trailing slash, if present
+			path = path.substring(0, path.length - 1);
+		}
+		if(path.charAt(0) == '/') {
+			// remove starting slash
+			path = path.substring(1, path.length);
+		}
+
+		// start with root
+		allbread = '<span class="fmLink" title="' + '/' + '" onClick="fmLib.call(\'' + url
+						 + '&fmMode=expOpenPath&fmObject=' + '/' + '\')">'
+						 + '<i class="fmIconHome"></i></span>\n';
+		if(path == "" ) return allbread;
+
+		path_ar = path.split('/');
+
+		p = '';
+		for (i=0; i < path_ar.length; i++) {
+			p += "/" + path_ar[i];
+			displayname = path_ar[i];
+			if(i == path_ar.length-1) {
+				//last part
+				allbread += crumbsep + '<span title="">'
+									+ displayname + '</span>\n';
+			} else {
+				// should urlencode path?
+				allbread += crumbsep + '<span class="fmLink" title="' + p + '" onClick="fmLib.call(\''
+									+ url + '&fmMode=expOpenPath&fmObject=' + p + '\')">'
+									+ displayname + '</span>\n';
+			}
+		};
+
+		return allbread;
+	},
+
+	shortenFilename: function(filename, allowed) {
+    // get extension
+    var fileSplit = filename.split(".");
+    var extension = fileSplit.length > 1 ?
+        '.' + fileSplit[fileSplit.length-1] : '';
+
+    if(filename.length - extension.length > allowed) {
+        var fileStart = filename.substring(0,allowed);
+        return fileStart + '[...]' + extension;
+    }
+    else return filename;
+	},
+
+	// create html markup for the title
 	parseTitle: function(json, contObj) {
 		if(typeof contObj != 'object') return false;
 		if(typeof json != 'object') json = eval('(' + json + ')');
@@ -18,60 +72,64 @@ var fmParser = {
 		var html, title, icon, dialogId;
 		var lang = fmContSettings[json.cont].language;
 		var userPerms = fmContSettings[json.cont].userPerms;
-		var url = fmWebPath + '/action.php?fmContainer=' + json.cont;
-		var width = $$(json.cont).offsetWidth - 162;
-		var cntFiles = this._getFileCount(json.cont);
+		var url = '?action&fmContainer=' + json.cont;
+		var cntFiles = (fmContSettings[json.cont].hideFileCnt) ? '' : '<span class="fmExplorerFileCnt">' + ' (' + this._getFileCount(json.cont) + ')';
 
 		if(typeof json.title != 'undefined' && json.title != '') {
 			title = json.title;
 
 			if(typeof json.path != 'undefined') {
-				title += ' ' + json.path + ' (' + cntFiles + ')';
+				title += ' ' + json.path + cntFiles;
 			}
 		}
 		else if(typeof json.search != 'undefined' && json.search != '') {
 			title = fmMsg[lang].searchResult + ': ' + json.search;
 		}
 		else if(typeof json.sysType != 'undefined' && json.sysType != '') {
-			title = '[' + json.sysType + '] ' + json.path + ' (' + cntFiles + ')';
+			title = '[' + json.sysType + '] ' + json.path + cntFiles;
 		}
-		else title = json.path + ' (' + cntFiles + ')';
+		else {
+			title = this.makeBreadcrumbs(json.path, url);// + cntFiles;
+		}
 
-		var style = 'padding:4px; text-align:left; white-space:nowrap';
-		html = '<div class="fmTH1" style="float:left; width:' + width + 'px; overflow:hidden; ' + style + '" title="' + title + '">' + title + '</div>\n';
+		html = '<div class="fmContTitlePath">' + title + '</div>\n';
 
 		if(!json.login) {
-			html += '<div class="fmTH1" style="float:right; ' + style + '">\n';
-			html += '<img src="' + fmWebPath + '/icn/refresh.png" title="' + fmMsg[lang].cmdRefresh + '" style="margin-left:2px; cursor:pointer" onClick="fmLib.call(\'' + url + '&fmMode=refreshAll\')" />\n';
+			html += '<div class="fmContTitleActions">\n';
+			html += '<i class="fmIconRefresh fmIcon" title="' + fmMsg[lang].cmdRefresh + '" onClick="fmLib.call(\'' + url + '&fmMode=refreshAll\')"></i>\n';
 
 			if(fmContSettings[json.cont].listType == 'details') {
 				title = fmMsg[lang].cmdIcons;
-				icon = 'list_icons.png';
+				icon = '<i class="fmIconViewIcons fmIcon"';
 			}
 			else {
 				title = fmMsg[lang].cmdDetails;
-				icon = 'list_details.png';
+				icon = '<i class="fmIconViewDetails fmIcon"';
 			}
-			html += '<img src="' + fmWebPath + '/icn/' + icon + '" title="' + title + '" style="margin-left:2px; cursor:pointer" onClick="fmLib.toggleListView(\'' + json.cont + '\')" />\n';
+			html += icon + ' title="' + title + '" onClick="fmLib.toggleListView(\'' + json.cont + '\')"></i>\n';
 
 			if(userPerms.restore) {
 				if(fmContSettings[json.cont].viewDeleted) {
 					title = fmMsg[lang].cmdHideDeleted;
-					icon = 'bin.png';
+					icon = '<i class="fmIconTrashbinOpen fmIcon"';
 				}
 				else {
 					title = fmMsg[lang].cmdViewDeleted;
-					icon = 'bin_closed.png';
+					icon = '<i class="fmIconTrashbinClosed fmIcon"';
 				}
-				html += '<img src="' + fmWebPath + '/icn/' + icon + '" title="' + title + '" style="margin-left:2px; cursor:pointer" onClick="fmLib.call(\'' + url + '&fmMode=toggleDeleted\')" />\n';
+				html += icon + ' title="' + title + '" onClick="fmLib.call(\'' + url + '&fmMode=toggleDeleted\')"></i>\n';
 			}
 
 			if(userPerms['search']) {
-				html += '<img src="' + fmWebPath + '/icn/search.png" title="' + fmMsg[lang].cmdSearch + '" style="margin-left:2px; cursor:pointer" onClick="fmLib.openDialog(\'' + url + '\', \'fmSearch\', \'' + fmMsg[lang].cmdSearch + '\')" />\n';
+				html += '<i class="fmIconSearch fmIcon" title="' + fmMsg[lang].cmdSearch + '" onClick="fmLib.openDialog(\'' + url + '\', \'fmSearch\', \'' + fmMsg[lang].cmdSearch + '\')"></i>\n';
 			}
 
 			if(userPerms.newDir) {
-				html += '<img src="' + fmWebPath + '/icn/folder_add.png" title="' + fmMsg[lang].cmdNewDir + '" style="margin-left:2px; cursor:pointer" onClick="fmLib.openDialog(\'' + url + '\', \'fmNewDir\', \'' + fmMsg[lang].cmdNewDir + '\')" />\n';
+				html += '<span class="fa-stack" title="' + fmMsg[lang].cmdNewDir + '" onClick="fmLib.openDialog(\'' + url + '\', \'fmNewDir\', \'' + fmMsg[lang].cmdNewDir + '\')"><i class="fmIconDir fa-stack-1x fmIcon" /*style="margin-left:0"*/></i><i class="fmIconPlus fa-stack-1x"></i></span>\n';
+			}
+
+			if(userPerms.createFile) {
+				html += '<span class="fa-stack" title="' + fmMsg[lang].cmdCreateFile + '" onClick="fmLib.openDialog(\'' + url + '\', \'fmCreateFile\', \'' + fmMsg[lang].cmdCreateFile + '\')"><i class="fmIconFile fa-stack-1x fmIcon" /*style="margin-left:0"*/></i><i class="fmIconPlus fa-stack-1x"></i></span>\n';
 			}
 
 			if(userPerms.upload) {
@@ -80,12 +138,13 @@ var fmParser = {
 					case 'java': dialogId = 'fmJavaUpload'; break;
 					default: dialogId = 'fmNewFile';
 				}
-				html += '<img src="' + fmWebPath + '/icn/upload.png" title="' + fmMsg[lang].cmdUploadFile + '" style="margin-left:2px; cursor:pointer" onClick="fmLib.openDialog(\'' + url + '\', \'' + dialogId + '\', \'' + fmMsg[lang].cmdUploadFile + '\')" />\n';
-				html += '<img src="' + fmWebPath + '/icn/download_url.png" title="' + fmMsg[lang].cmdSaveFromUrl + '" style="margin-left:2px; cursor:pointer" onClick="fmLib.openDialog(\'' + url + '\', \'fmSaveFromUrl\', \'' + fmMsg[lang].cmdSaveFromUrl + '\')" />\n';
+				html += '<i class="fmIconUpload fmIcon" title="' + fmMsg[lang].cmdUploadFile + '" onClick="fmLib.openDialog(\'' + url + '\', \'' + dialogId + '\', \'' + fmMsg[lang].cmdUploadFile + '\')"></i>\n';
+
+				html += '<i class="fmIconDownload fmIcon" title="' + fmMsg[lang].cmdSaveFromUrl + '" onClick="fmLib.openDialog(\'' + url + '\', \'fmSaveFromUrl\', \'' + fmMsg[lang].cmdSaveFromUrl + '\')"></i>\n';
 			}
 			html += '</div>\n';
 		}
-		contObj.innerHTML = html;
+		if(contObj) contObj.innerHTML = html;
 		return true;
 	},
 
@@ -119,8 +178,13 @@ var fmParser = {
 				var bTr = cBody.getElementsByTagName('tr')[0];
 				var bTds = bTr.getElementsByTagName('td');
 
-				for(var i = 0; i < hDivs.length; i++) {
-					hDivs[i].style.width = bTds[i].offsetWidth + 'px';
+				//MP last item first
+				hDivs[hDivs.length-1].style.width = (bTds[hDivs.length-1].offsetWidth - 1) + 'px';
+
+				for(var i = 0; i < hDivs.length-1; i++) {
+					//MP instead of left margin 1px on fmContDetHead
+					if(i == 0) hDivs[i].style.width = (bTds[i].offsetWidth + 1) + 'px';
+					else hDivs[i].style.width = bTds[i].offsetWidth + 'px';
 				}
 				clickArea = cBody;
 			}
@@ -156,6 +220,7 @@ var fmParser = {
 		return true;
 	},
 
+	// create html markup for the main window - details view
 	parseEntriesDetailView: function(json) {
 		if(typeof json != 'object') return '';
 		if(!json.entries) return '';
@@ -167,10 +232,14 @@ var fmParser = {
 		var cw = [];
 		var cwLastCol = (userPerms.remove || userPerms.bulkDownload || !userPerms.hideDisabledIcons) ? 20 : 0;
 		var listCont = $$(json.cont + 'List');
-		var twidth = listCont.offsetWidth - 16;
+		listCont.innerHTML = ''; //MP must empty the content so that width is correctly recalculated
+		var twidth = listCont.offsetWidth - 16; //MP the width of the scrollbar?
 		var theight = listCont.offsetHeight;
+		var fmContDetHeadHeight = 26; //MP the head height - if you change the height in css, you must change it here too!!
 		var timestamp = Math.round((new Date()).getTime() / 1000);
+		cssData = '';
 
+		// calculate the widths of columns
 		for(i in entries.captions) {
 			switch(entries.captions[i]) {
 				case 'isDir':
@@ -198,8 +267,9 @@ var fmParser = {
 		}
 		var cwOther = Math.floor((twidth - cwLastCol - 30 - fmTools.arraySum(cw)) / (entries.captions.length - cw.length));
 
-		cssRow = (json.search != '') ? 'fmSearchResult' : 'fmTD1';
-		html = '<div id="' + json.cont + '_detHead" class="fmTH2" style="white-space:nowrap; height:20px">\n';
+		// header
+		cssRow = (json.search != '') ? 'fmSearchResult' : '';
+		html = '<div id="' + json.cont + '_detHead" class="fmContDetHead">\n';
 
 		for(i in entries.captions) {
 			if(!cw[i]) cw[i] = cwOther;
@@ -209,12 +279,12 @@ var fmParser = {
 
 			if(entries.captions[i] == fmContSettings[json.cont].sort.field) {
 				if(fmContSettings[json.cont].sort.order == 'asc') {
-					img = 'sort_asc.gif';
+					img = 'fmIconSortAsc';
 					order = 'desc';
 					tooltip += fmMsg[lang].cmdSortDesc;
 				}
 				else {
-					img = 'sort_desc.gif';
+					img = 'fmIconSortDesc';
 					order = 'asc';
 					tooltip += fmMsg[lang].cmdSortAsc;
 				}
@@ -225,57 +295,62 @@ var fmParser = {
 				tooltip += fmMsg[lang].cmdSortAsc;
 			}
 			action = "fmLib.sortList('" + json.cont + "', '" + entries.captions[i] + "', '" + order + "')";
-			style = 'display:inline-block; overflow:hidden; width:' + cw[i] + 'px; height:20px';
-			html += '<div class="fmTH3" style="' + style + '" title="' + tooltip + '" onMouseOver="this.className=\'fmTH4\'" onMouseOut="this.className=\'fmTH3\'" onMouseDown="this.className=\'fmTH5\'" onMouseUp="this.className=\'fmTH4\'" onClick="' + action + '">\n';
-			if(img != '') html += '<img src="' + fmWebPath + '/icn/' + img + '" />';
+			style = 'width:' + cw[i] + 'px;';
+			if(i == 0) style = 'width:' + (cw[i] + 1) +'px;'; //MP first column in header needs one extra pixel
+			html += '<div style="' + style + '" title="' + tooltip + '" onClick="' + action + '">\n';
+			if(img != '') html += '<i class="' + img + '"></i>';
 			if(caption != '') html += ((img != '') ? '&nbsp;' : '') + caption;
 			html += '</div>';
 		}
 
+		// menu
 		if(cwLastCol > 0) {
 			action = this.parseAction(entries.lastCol, json.cont);
-			html += '<div class="fmTH2" style="display:inline-block; overflow:hidden; width:' + cwLastCol + 'px; height:20px; padding:2px; text-align:center">';
-			html += '<img src="' + fmWebPath + '/icn/' + entries.lastCol.icon + '" style="' + entries.lastCol.style + '" title="' + entries.lastCol.tooltip + '" onClick="' + action + '" />';
+			html += '<div style="width:' + cwLastCol + 'px;">';
+			html += '<i class="' + entries.lastCol.icon + '" style="' + entries.lastCol.style + '" title="' + entries.lastCol.tooltip + '" onClick="' + action + '"></i>';
 			html += '</div>\n';
 		}
 		html += '</div>\n';
-		html += '<div id="' + json.cont + '_detBody" style="height:' + (theight - 20) + 'px; overflow:auto">\n';
-		html += '<table id="' + json.cont + '_detBodyTable" border="0" cellspacing="1" cellpadding="0" width="100%" class="fmTH2">\n';
 
-		// create an empty line on top (just for the "select all" checkbox)
+		// div and table with folders and files
+		html += '<div id="' + json.cont + '_detBody" class="fmContBody" style="height:' + (theight - fmContDetHeadHeight) + 'px">\n'; //height is needed!!!!
+		html += '<table id="' + json.cont + '_detBodyTable" class="fmContBodyTable" border="0" cellspacing="1" cellpadding="0" width="100%">\n';
+
+		// empty line on top for the "select all" checkbox
 		if (cwLastCol > 0 && entries.items[0] && entries.items[0].id) {
-			html += '<tr class="' + cssRow + '" style="height:24px" onMouseOver="this.className=\'fmTD2\'" onMouseOut="this.className=\'' + cssRow + '\'">\n';
-			for(j in entries.captions) html += '<td class="' + cssData + '"></td>\n';
+			html += '<tr>\n';
+			for(j in entries.captions) html += '<td class="' + cssData + '">&nbsp;</td>\n';
 			html += '<td width="' + cwLastCol + '" class="' + cssData + '" align="center">';
 			html += '<input type="checkbox" style="margin:0" onClick="fmTools.selectAll(this, \'' + json.cont + '\')" value="" />';
 			html += '</td>\n';
 			html += '</tr>\n';
 		}
 
+		// entries
 		for(i in entries.items) {
 			fmEntries[json.cont][entries.items[i].id] = entries.items[i];
 			action = this._checkAction(entries.items[i], json);
 
 			if(entries.items[i].deleted) {
-				cssData = 'fmContentDisabled';
+				cssData = 'class="fmContentDeleted"';
 			}
 			else if(fmContSettings[json.cont].markNew && entries.items[i].changedTimeStamp > timestamp - 24 * 3600) {
-				cssData = 'fmContentNew';
+				cssData = 'class="fmContentNew"';
 			}
-			else cssData = 'fmContent';
+			else cssData = '';
 
-			html += '<tr class="' + cssRow + '" style="height:24px" onMouseOver="this.className=\'fmTD2\'" onMouseOut="this.className=\'' + cssRow + '\'">\n';
-
+			html += '<tr>\n';
 			for(j in entries.captions) {
 				switch(entries.captions[j]) {
 					case 'isDir':
-						content = '<img src="' + fmWebPath + '/icn/small/' + entries.items[i].icon + '" />';
+						content = '<i class="' + entries.items[i].icon + '"></i>';
 						style = 'text-align:center';
 						tooltip = '';
 						break;
 					case 'name':
 						content = tooltip = entries.items[i].name;
 						style = 'text-align:left';
+						content = this.shortenFilename(content, parseInt(cw[j] / 8.5)); //MP for 13px font size
 						break;
 					case 'size':
 						content = tooltip = entries.items[i].size;
@@ -285,14 +360,14 @@ var fmParser = {
 						content = tooltip = entries.items[i][entries.captions[j]];
 						style = 'text-align:center';
 				}
-				html += '<td class="' + cssData + '" style="cursor:pointer" title="' + tooltip + '" " onMouseDown="' + action + '" align="left">';
-				html += '<div class="' + cssData + '" style="width:' + cw[j] + 'px; overflow:hidden; padding:2px; white-space:nowrap; ' + style + '">' + content + '</div>';
+				html += '<td title="' + tooltip + '" onMouseDown="' + action + '" align="left">';
+				html += '<div ' + cssData + ' style="width:' + cw[j] + 'px;' + style + '">' + content + '</div>';
 				html += '</td>\n';
 			}
 
 			if(cwLastCol > 0) {
-				html += '<td width="' + cwLastCol + '" class="' + cssData + '" align="center">';
-				html += '<input type="checkbox" style="margin:0" value="' + entries.items[i].id + '"';
+				html += '<td width="' + cwLastCol + '" align="center">';
+				html += '<input type="checkbox" value="' + entries.items[i].id + '"';
 				if(entries.items[i].id == '') html += ' onClick="fmTools.selectAll(this, \'' + json.cont + '\')" />';
 				else if(entries.items[i].deleted) html += ' disabled="disabled" />';
 				else html += ' />';
@@ -302,63 +377,68 @@ var fmParser = {
 		}
 		html += '</table>\n';
 		html += '</div>\n';
+
 		return html;
 	},
 
+	// create html markup for the main window - icons view
 	parseEntriesIconView: function(json) {
 		if(typeof json != 'object') return '';
 		if(!json.entries) return '';
 
 		var html, i, action, cssRow, cssData, cssIcon, thumbWidth, thumbHeight, perc, name, img, cellsPerRow, cellWidth, isImage;
-		var url = fmWebPath + '/action.php?fmContainer=' + json.cont;
+		var url = '?action&fmContainer=' + json.cont;
 		var entries = json.entries;
 		var cellCnt = 0;
-		var listWidth = $$(json.cont + 'List').offsetWidth;
+		var listCont = $$(json.cont + 'List');
+		listCont.innerHTML = ''; //MP must empty the content so that width is correctly recalculated
+		var listWidth = listCont.offsetWidth;
 		var timestamp = Math.round((new Date()).getTime() / 1000);
 
 		cellsPerRow = listWidth / 130;
 		cellWidth = Math.ceil(listWidth / cellsPerRow) - 14;
 		cellsPerRow = Math.floor(cellsPerRow);
-		cssRow = (json.search != '') ? 'fmSearchResult' : 'fmTD1';
+		cssRow = (json.search != '') ? 'fmSearchResult' : 'fmContBodyTableIconsTd';
 
-		html = '<table border="0" cellspacing="2" cellpadding="5" width="100%" class="fmTH2">\n';
+		html = '<table width="100%" class="fmContBodyTableIcons">\n';
 		html += '<colgroup>\n';
 
 		for(i = 0; i < cellsPerRow; i++) {
 			html += '<col width="' + cellWidth + 'px"/>\n';
 		}
 		html += '</colgroup>\n';
-		html += '<tr align="center" valign="top">\n';
+		html += '<tr class="fmContBodyTableIconsTr">\n';
 
 		for(i in entries.items) {
 			fmEntries[json.cont][entries.items[i].id] = entries.items[i];
 			action = this._checkAction(entries.items[i], json);
 
 			if(entries.items[i].deleted) {
-				cssData = 'fmContentDisabled';
+				cssData = 'class="fmContentDeleted"';
 			}
 			else if(fmContSettings[json.cont].markNew && entries.items[i].changedTimeStamp > timestamp - 24 * 3600) {
-				cssData = 'fmContentNew';
+				cssData = 'class="fmContentNew"';
 			}
-			else cssData = 'fmContent';
+			else cssData = '';
 
 			if(cellCnt >= cellsPerRow) {
-				html += '</tr>\n<tr align="center" valign="top">\n';
+				html += '</tr>\n<tr class="fmContBodyTableIconsTr">\n';
 				cellCnt = 0;
 			}
 			isImage = entries.items[i].name.match(this.imageFiles);
 			cssIcon = (isImage || entries.items[i].id3.Picture) ? 'fmThumbnail' : '';
 
-			html += '<td class="' + cssRow + '" style="cursor:pointer" onMouseDown="' + action + '" onMouseOver="this.className=\'fmTD2\'" onMouseOut="this.className=\'' + cssRow + '\'">\n';
+			html += '<td class="' + cssRow + '" onMouseDown="' + action + '">\n';
 			html += '<table border="0" cellspacing="0" cellpadding="0" width="100%">\n';
 			html += '<tr>\n';
-			html += '<td align="center" class="' + cssIcon + '" style="height:54px">';
+			html += '<td class="' + cssIcon + '" style="height:54px">';
 
 			if(entries.items[i].id3.Picture) {
 				thumbWidth = cellWidth;
 				thumbHeight = 50;
 				name = entries.items[i].id3.Picture.split(':')[0];
 				img = url + '&fmMode=getCachedImage&fmObject=' + name + '&width=' + thumbWidth + '&height=' + thumbHeight;
+				html += '<div style="height:' + thumbHeight + 'px; background:url(' + img + ') center no-repeat"></div>';
 			}
 			else if(isImage) {
 				thumbWidth = entries.items[i].width;
@@ -376,16 +456,17 @@ var fmParser = {
 					thumbHeight = Math.round(thumbHeight * perc);
 				}
 				img = url + '&fmMode=getThumbnail&fmObject=' + entries.items[i].id + '&width=' + thumbWidth + '&height=' + thumbHeight + '&hash=' + entries.items[i].hash;
+				html += '<div style="height:' + thumbHeight + 'px; background:url(' + img + ') center no-repeat"></div>';
 			}
 			else {
-				img = fmWebPath + '/icn/big/' + entries.items[i].icon;
+				img = '<i class="' + entries.items[i].icon + ' fmIcon_large"></i>'
 				thumbHeight = 50;
+				html += img;
 			}
-			html += '<div style="height:' + thumbHeight + 'px; background:url(' + img + ') center no-repeat"></div>';
 			html += '</td>\n';
 			html += '</tr><tr>\n';
-			html += '<td align="center" style="height:20px">\n';
-			html += '<div class="' + cssData + '" style="overflow:hidden; white-space:nowrap; vertical-align:middle; width:' + (cellWidth - 2) + 'px" title="' + entries.items[i].name + '">' + entries.items[i].name + '</div>\n';
+			html += '<td>\n';
+			html += '<div ' + cssData + ' style="max-width:' + (cellWidth + 14) + 'px" title="' + entries.items[i].name + '">' + entries.items[i].name + '</div>\n';
 			html += '</td>\n';
 			html += '</tr></table>\n';
 			html += '</td>\n';
@@ -393,13 +474,14 @@ var fmParser = {
 		}
 
 		while(cellCnt < cellsPerRow) {
-			html += '<td class="' + cssRow + '">&nbsp;</td>\n';
+			html += '<td class="fmContBodyTableIconsEmpty">&nbsp;</td>\n';
 			cellCnt++;
 		}
 		html += '</tr></table>\n';
 		return html;
 	},
 
+	// create html markup for the explorer window
 	parseExplorer: function(json, link) {
 		if(typeof json != 'object') return '';
 		if(!json.explorer) return '';
@@ -408,6 +490,8 @@ var fmParser = {
 		var html = '';
 		var explorer = json.explorer;
 		var lang = fmContSettings[json.cont].language;
+		// if you change titleHeight in css, you have to change here too, but give a few pixels more
+		var fmExplorerTitleHeight = 25;
 		fmContSettings[json.cont].expJson = json;
 
 		if(typeof fmContSettings[json.cont].expanded != 'object') {
@@ -426,8 +510,8 @@ var fmParser = {
 			if(fmContSettings[json.cont].quota) {
 				caption += ' / ' + fmTools.bytes2string(fmContSettings[json.cont].quota, 1);
 			}
-			html += '<div class="fmExplorerTitle" style="height:20px" title="' + caption + '">' + caption + '</div>';
-			html += '<div style="height:' + ($$(json.cont + 'Exp').offsetHeight - 20) + 'px; overflow:auto">';
+			html += '<div class="fmExplorerTitle" title="' + caption + '">' + caption + '</div>';
+			html += '<div style="height:' + ($$(json.cont + 'Exp').offsetHeight - fmExplorerTitleHeight) + 'px;overflow:auto">'; //needed !!!!
 		}
 
 		for(i = 0; i < explorer.items.length; i++) {
@@ -437,7 +521,7 @@ var fmParser = {
 				explorer.items[i].cntReload = 0;
 			}
 			if(link) url = link + '&fmName=' + explorer.items[i].id;
-			else url = fmWebPath + '/action.php?fmContainer=' + json.cont + '&fmMode=expOpen&fmObject=' + explorer.items[i].id;
+			else url = '?action&fmContainer=' + json.cont + '&fmMode=expOpen&fmObject=' + explorer.items[i].id;
 
 			if(explorer.items[i-1] && explorer.items[i-1].level < explorer.items[i].level) {
 				hash = explorer.items[i-1].hash;
@@ -449,28 +533,28 @@ var fmParser = {
 			}
 			isCurDir = (explorer.items[i].path == fmContSettings[json.cont].listJson.path);
 			cls = isCurDir ? 'fmExplorerActive' : 'fmExplorer';
-			html += '<div class="' + cls + '" onMouseOver="this.className=\'fmExplorerHilight\'" onMouseOut="this.className=\'' + cls + '\'">';
+			html += '<div class="' + cls + '">';
 
 			if(explorer.items[i].level > 1) for(j = 1; j < explorer.items[i].level; j++) {
-				html += '<img src="' + fmWebPath + '/icn/blank.gif" width="8" height="1" />';
+				html += '<i class="fmIconBlank"></i>';
 			}
 
 			if(explorer.items[i+1] && explorer.items[i+1].level > explorer.items[i].level) {
 				hash = explorer.items[i].hash;
 				if(fmContSettings[json.cont].expanded[hash]) {
-					icon = 'treeClose.gif';
-					icon2 = 'dir_open.gif';
+					icon = "<i class='fmIconTreeClose'";
+					icon2 = "<i class='fmIconDirOpen'";
 				}
 				else {
-					icon = 'treeOpen.gif';
-					icon2 = 'dir.gif';
+					icon = "<i class='fmIconTreeOpen'";
+					icon2 = "<i class='fmIconDirClose'";
 				}
 				action = 'fmLib.toggleTreeItem(this)';
 				style = 'cursor:pointer';
 			}
 			else {
-				icon = 'blank.gif';
-				icon2 = 'dir.gif';
+				icon = "<i class='fmIconBlank'";
+				icon2 = "<i class='fmIconDirClose'";
 				action = style = '';
 			}
 
@@ -483,15 +567,15 @@ var fmParser = {
 
 						if(explorer.items[i].cntReload < 2) {
 							/* ugly workaround: if number of files doesn't match, reload */
-							fmLib.call(fmWebPath + '/action.php?fmContainer=' + json.cont + '&fmMode=refreshAll');
+							fmLib.call('?action&fmContainer=' + json.cont + '&fmMode=refreshAll');
 							explorer.items[i].cntReload++;
 						}
 					}
 				}
 			}
 			caption = explorer.items[i].name + ' (' + explorer.items[i].files + ')';
-			html += '<img src="' + fmWebPath + '/icn/' + icon + '" onClick="' + action + '" style="' + style + '" />';
-			html += '<img src="' + fmWebPath + '/icn/' + icon2 + '" id="' + (!link ? json.cont + 'DirIcon' + i : '') + '" hspace="4" onClick="fmLib.call(\'' + url + '\')" style="cursor:pointer" />';
+			html += icon + ' onClick="' + action + '" style="' + style + '"></i>';
+			html += icon2 + ' id="' + (!link ? json.cont + 'DirIcon' + i : '') + '" onClick="fmLib.call(\'' + url + '\')" style="cursor:pointer"></i>';
 			html += '<span class="fmExplorerContent" onClick="fmLib.call(\'' + url + '\')" style="cursor:pointer" title="' + caption + '">' + explorer.items[i].name;
 			html += (fmContSettings[json.cont].hideFileCnt ? '' : ' <span class="fmExplorerFileCnt">(' + explorer.items[i].files + ')</span>');
 			html += '</span></div>';
@@ -511,28 +595,35 @@ var fmParser = {
 		if(typeof contObj != 'object') return false;
 		if(typeof json != 'object') json = eval('(' + json + ')');
 
-		var btn = $$('fmEditorButton');
+		var btn = $$('fmEditorButton'); //save button top
+		var btn1 = $$('fmEditorButton1'); //save button bottom
 		var title = $$('fmEditorText');
 		var lang = fmContSettings[json.cont].language;
 
 		if(btn && btn.innerHTML == '') {
-			btn.innerHTML = '<img src="' + fmWebPath + '/icn/save.png" style="cursor:pointer" title="' + fmMsg[lang].cmdSave + '" onClick="fmLib.callOK(\'' + fmMsg[lang].msgSaveFile + '\', \'\', \'frmEdit\')" />';
+			btn.innerHTML = '<i class="fmIconSave" style="cursor:pointer" title="' + fmMsg[lang].cmdSave + '" onClick="fmLib.callSave(\'' + fmMsg[lang].msgSaveFile + '\', \'\', \'frmEdit\')"></i>';
+		}
+		//if(btn1 && btn1.innerHTML == '') {
+		if(btn1) {
+			btn1.innerHTML = '<span class="ui-button-text" style="cursor:pointer" title="' + fmMsg[lang].cmdSave + '" onClick="fmLib.callSave(\'' + fmMsg[lang].msgSaveFile + '\', \'\', \'frmEdit\')">' + fmMsg[lang].cmdSave + '</span>';
 		}
 
 		if(title && json.text.encoding) {
 			title.innerHTML += ' [' + json.text.encoding + ']';
 		}
+		title.innerHTML += '<span id="fmEditorChange"></span>'; // change indicator
 
 		var html;
-		var url = fmWebPath + '/action.php?fmContainer=' + json.cont;
+		var url = '?action&fmContainer=' + json.cont;
 		var width = fmContSettings[json.cont].docViewerWidth;
 		var height = fmContSettings[json.cont].docViewerHeight;
 
 		html = '<form name="frmEdit" class="fmForm" action="javascript:fmLib.call(\'' + url + '\', \'frmEdit\')" method="post">\n';
 		html += '<input type="hidden" name="fmMode" value="edit" />\n';
 		html += '<input type="hidden" name="fmObject" value="' + json.id + '" />\n';
-		html += '<textarea name="fmText" style="width:' + width + 'px; height:' + height + 'px; margin:0px" ';
-		html += 'class="codeedit ' + json.text.lang + ' lineNumbers focus" wrap="off">' + json.text.content + '</textarea>\n';
+		html += '<textarea name="fmText" ';
+		//MP don't forget newline before json.text.content in textarea!!!
+		html += 'class="codeedit ' + json.text.lang + ' lineNumbers focus" wrap="off">\n' + json.text.content + '</textarea>\n';
 		html += '</form>\n';
 
 		contObj.innerHTML = html;
@@ -552,14 +643,15 @@ var fmParser = {
 			title.innerHTML += ' [' + json.text.encoding + ']';
 		}
 
-		html = '<pre style="width:' + width + 'px; height:' + height + 'px; margin:0px; visibility:hidden" ';
-		html += 'class="codeview ' + json.text.lang + ' lineNumbers">' + json.text.content + '</pre>\n';
+		html = '<textarea name="fmText" ';
+		html += 'class="codeedit ' + json.text.lang + ' lineNumbers focus" wrap="off">\n' + json.text.content + '</textarea>\n';
 
 		contObj.innerHTML = html;
 		return true;
 	},
 
 	parseLogin: function(json) {
+		return ''; //MP we don't use this
 		if(typeof json != 'object') return '';
 		if(!json.login) return '';
 
@@ -567,7 +659,7 @@ var fmParser = {
 		var action = this.parseAction(json.login, json.cont);
 		var lang = fmContSettings[json.cont].language;
 
-		html =  '<div class="fmTH3" style="height:100%; padding:4px">\n';
+		html =  '<div class="fmxTH3" style="height:100%; padding:4px">\n';
 		html += '<div style="position:relative; width:180px; top:50%; left:50%; margin-top:-30px; margin-left:-90px; text-align:center">\n';
 		html += '<form name="' + json.cont + 'Login" action="javascript:' + action + '" class="fmForm" method="post">\n';
 		html += '<input type="hidden" name="fmMode" value="login" />\n';
@@ -681,7 +773,7 @@ var fmParser = {
 					width = maxWidth;
 					height = Math.round(height * (maxWidth / width));
 				}
-				cover = fmWebPath + '/action.php?fmContainer=' + json.curCont + '&fmMode=getCachedImage&fmObject=' + img + '&width=' + width + '&height=' + height;
+				cover = '?action&fmContainer=' + json.curCont + '&fmMode=getCachedImage&fmObject=' + img + '&width=' + width + '&height=' + height;
 			}
 			else cover = '';
 
@@ -739,16 +831,36 @@ var fmParser = {
 
 		var html = '<table border="0" cellspacing="0" cellpadding="1" width="100%"><tr align="left" valign="top">' +
 			'<td class="fmContent"><b>' + fmMsg[lang].name + ':</b></td><td class="fmContent">' + fmEntries[curCont][id].fullName + '</td>' +
-			'</tr><tr align="left">' +
-			'<td class="fmContent"><b>' + fmMsg[lang].permissions + ':</b></td><td class="fmContent">' + fmEntries[curCont][id].permissions + '</td>' +
-			'</tr><tr align="left">' +
-			'<td class="fmContent"><b>' + fmMsg[lang].owner + ':</b></td><td class="fmContent">' + fmEntries[curCont][id].owner + '</td>' +
-			'</tr><tr align="left">' +
-			'<td class="fmContent"><b>' + fmMsg[lang].group + ':</b></td><td class="fmContent">' + fmEntries[curCont][id].group + '</td>' +
-			'</tr><tr align="left">' +
-			'<td class="fmContent"><b>' + fmMsg[lang].changed + ':</b></td><td class="fmContent" nowrap="nowrap">' + fmEntries[curCont][id].changed + '</td>' +
+			'</tr><tr align="left" valign="top">' +
+			'<td class="fmContent"><b>' + fmMsg[lang].permissions + ':</b></td><td class="fmContent" id="fmPermissions">' + fmEntries[curCont][id].permissions + '</td>' +
+			'</tr><tr align="left" valign="top">';
+			if(fmContSettings[curCont].isWin == 1) {
+				html += '<td class="fmContent"><b>' + 'Acl' + ':</b></td><td class="fmContent" id="fmAcl">' + fmEntries[curCont][id].permissions + '</td>' +
+								'</tr><tr align="left">';
+			}
+			html += '<td class="fmContent"><b>' + fmMsg[lang].owner + ':</b></td><td class="fmContent" id="fmOwner">' + fmEntries[curCont][id].owner + '</td>' +
+							'</tr><tr align="left">';
+			if(fmContSettings[curCont].isWin == 0) {
+				html += '<td class="fmContent"><b>' + fmMsg[lang].group + ':</b></td><td class="fmContent">' + fmEntries[curCont][id].group + '</td>' +
+								'</tr><tr align="left">';
+			}
+			html += '<td class="fmContent"><b>' + fmMsg[lang].changed + ':</b></td><td class="fmContent" nowrap="nowrap">' + fmEntries[curCont][id].changed + '</td>' +
 			'</tr><tr align="left">' +
 			'<td class="fmContent"><b>' + fmMsg[lang].size + ':</b></td><td class="fmContent" nowrap="nowrap">' + size + '</td>';
+
+		if(fmContSettings[curCont].isWin == 1) {
+			var url = '?action&fmContainer=' + curCont + '&fmMode=getAcl&fmObject=' + id; // + '&hash=' + fmEntries[curCont][id].hash;
+			var ajaxObj3 = new ajax();
+			ajaxObj3.makeRequest(url, function() {
+				var json = eval('(' + ajaxObj3.response + ')');
+				$$('fmOwner').innerHTML = json.owner;
+				$$('fmAcl').innerHTML = json.acl;
+				$$('fmPermissions').innerHTML = json.perms;
+				// reposition the modal since it has grown in height
+				//fmLib.setDialogLeft(null, $$('fmInfo'), $$(fmLib.curCont1));
+				fmLib.setDialogTop(null, $$('fmInfo'), $$(fmLib.curCont1));
+			});
+		}
 
 		if(typeof fmEntries[curCont][id].id3 == 'object') {
 			id3 = fmEntries[curCont][id].id3;
@@ -765,16 +877,18 @@ var fmParser = {
 
 			if(tags) {
 				html += '</tr><tr align="left">';
-				html += '<td class="fmContent" colspan="2"><div style="height:0px; margin:4px 0px; border:1px inset #FFFFFF"></div></td>';
+				html += '<td class="fmContent" colspan="2"><div style="height:0; margin:4px 0; border:1px inset #FFF"></div></td>';
 				html += tags;
 			}
 		}
 
 		if(fmEntries[curCont][id].type == 'image' || id3Picture) {
 			if(id3Picture) {
-				icon = fmWebPath + '/action.php?fmContainer=' + curCont + '&fmMode=getCachedImage&fmObject=' + id3Picture + '&width=100&height=100';
+				//MP when viewing mp3 file info
+				icon = '?action&fmContainer=' + curCont + '&fmMode=getCachedImage&fmObject=' + id3Picture + '&width=100&height=100';
+				icon = '<img src="' + icon + '"/>';
 				css = 'fmThumbnail';
-				style = 'width:102px; height:102px; background-color:#FFFFFF; cursor:pointer';
+				style = 'width:100px;height:100px;box-shadow:3px 3px 4px #808080';
 				action = this.parseAction({caption:fmMsg[lang].cmdView,dialog:'fmCoverViewer',content:id3Picture}, curCont, id);
 			}
 			else {
@@ -790,20 +904,23 @@ var fmParser = {
 					thumbWidth = Math.round(thumbWidth * 100 / thumbHeight);
 					thumbHeight = 100;
 				}
-				icon = fmWebPath + '/action.php?fmContainer=' + curCont + '&fmMode=getThumbnail&fmObject=' + id + '&width=' + thumbWidth + '&height=' + thumbHeight + '&hash=' + fmEntries[curCont][id].hash;
+				icon = '?action&fmContainer=' + curCont + '&fmMode=getThumbnail&fmObject=' + id + '&width=' + thumbWidth + '&height=' + thumbHeight + '&hash=' + fmEntries[curCont][id].hash;
+				icon = '<img src="' + icon + '"/>';
 				css = 'fmThumbnail';
-				style = 'width:' + thumbWidth + 'px; height:' + thumbHeight + 'px; background-color:#FFFFFF; cursor:pointer';
+				style = 'width:' + thumbWidth + 'px;height:' + thumbHeight + 'px;background-color:#FFF;cursor:pointer';
 				action = this.parseAction({caption:fmMsg[lang].cmdView,dialog:'fmImgViewer'}, curCont, id);
 			}
 		}
 		else {
-			icon = fmWebPath + '/icn/big/' + fmEntries[curCont][id].icon;
+			icon = fmEntries[curCont][id].icon + ' fmIcon_large';
+			icon = '<i class="' + icon + '"></i>';
 			width = height = 32;
+			style = "padding-top:20px;border-top:1px solid #ddd";
 		}
-		html += '</tr><tr align="left"><td colspan="2" height="8"></td></tr><tr>' +
+		html += '</tr><!--<tr align="left"><td colspan="2" height="8"></td></tr>--><tr>' +
 				'<td colspan="2" align="center">' +
 				'<div class="' + css + '" style="' + style + '" onClick="' + action + '">' +
-				'<img src="' + icon + '"/></div></td>';
+				icon + '</div></td>';
 		html += '</tr></table>';
 		return html;
 	},
@@ -811,7 +928,7 @@ var fmParser = {
 	parseAction: function(json, curCont, id) {
 		if(typeof json != 'object') return '';
 
-		var url = fmWebPath + '/action.php?fmContainer=' + curCont;
+		var url = '?action&fmContainer=' + curCont;
 		var i, params, caption;
 		var action = name = '';
 
@@ -844,7 +961,7 @@ var fmParser = {
 				for(i in json.caption) json.caption[i] = json.caption[i].replace(/\'/g, "\\'");
 				action = "fmLib.openDialog('', 'fmError', ['" + json.caption[0] + "', '" + json.caption[1] + "'])";
 			}
-			else if(fmTools.inArray(json.dialog, ['fmSearch', 'fmNewDir', 'fmSaveFromUrl', 'fmFileDrop', 'fmJavaUpload', 'fmNewFile'])) {
+			else if(fmTools.inArray(json.dialog, ['fmSearch', 'fmNewDir', 'fmCreateFile', 'fmSaveFromUrl', 'fmFileDrop', 'fmJavaUpload', 'fmNewFile'])) {
 				caption = json.caption.replace(/\'/g, "\\'");
 				action = "fmLib.openDialog('" + url + "', '" + json.dialog + "', '" + caption + "')";
 			}
@@ -874,33 +991,19 @@ var fmParser = {
 			if(items[i].caption == 'separator') {
 				if(items[i+1] && items[i+1].caption != 'separator') {
 					if(items[i].title) {
-						css = 'width:190px; text-align:left; white-space:nowrap; padding-left:5px; overflow:hidden';
-						html += '<tr class="fmMenuTitle">' +
-								'<td class="fmMenuBorder" height="22" colspan="2"><div class="fmMenuTitle" style="' + css + '">' + items[i].title + '</div></td>' +
-								'</tr>';
-					}
-					else {
-						css = 'height:0; border-bottom:1px solid #FFFFFF';
-						html += '<tr class="fmTD2">' +
-								'<td class="fmMenuBorder" style="' + css + '"></td>' +
-								'<td class="fmMenuBorder" style="' + css + '"></td>' +
-								'</tr>';
+						html += '<tr class="fmMenuBorder"><td class="fmMenuTitle" colspan="2" height="22">' + items[i].title + '</td></tr>';
+					} else {
+						html += '<tr class="fmMenuBorder" style="border-bottom:none"><td colspan="2" style="height:0"></td></tr>';
 					}
 				}
-			}
-			else {
-				css = (items[i].call || items[i].exec || items[i].dialog) ? 'fmMenuItem' : 'fmContentDisabled';
-				icon = fmWebPath + '/icn/' + items[i].icon;
+			} else {
+				css = (items[i].call || items[i].exec || items[i].dialog) ? 'fmMenuItem' : 'fmMenuItemDisabled';
+				icon = '<i class="' + items[i].icon + '"></i>';
 				action = this.parseAction(items[i], curCont, id);
 
-				html += '<tr class="fmTD2" style="cursor:pointer; height:22px"' +
-						' onMouseOver="this.className=\'fmTH2\'"' +
-						' onMouseOut="this.className=\'fmTD2\'"' +
-						' onClick="' + action + '">' +
-						'<td class="fmTH2" width="24" align="center">' +
-						'<img src="' + icon + '" border="0" /></td>' +
-						'<td class="' + css + '" align="left" style="padding-left:4px">' + items[i].caption + '</td>' +
-						'</tr>';
+				html += '<tr class="fmMenuTR" style="cursor:pointer;height:24px" onClick="' + action + '">' +
+						'<td class="fmMenuTD" width="24" align="center">' + icon +
+						'<td class="' + css + '">' + items[i].caption + '</td></tr>';
 			}
 		}
 		html += '</table>';
@@ -908,7 +1011,7 @@ var fmParser = {
 	},
 
 	_checkAction: function(item, json) {
-		var url = fmWebPath + '/action.php?fmContainer=' + json.cont;
+		var url = '?action&fmContainer=' + json.cont;
 		var menu = "fmLib.viewMenu('" + item.id + "', '" + json.cont + "')";
 		if(item.deleted) return menu;
 
@@ -939,15 +1042,16 @@ var fmParser = {
 				switch(item.docType) {
 
 					case 1:	// plain text
-						action = this.parseAction({caption:fmMsg[lang].cmdView,dialog:'fmTextViewer'}, json.cont, item.id);
+						if(item.type == 'code' || item.type == 'text') action = this.parseAction({caption:fmMsg[lang].cmdEdit,dialog:'fmEditor'}, json.cont, item.id);
+						else action = this.parseAction({caption:fmMsg[lang].cmdView,dialog:'fmTextViewer'}, json.cont, item.id);
 						break;
 
 					case 2:	// Google Docs Viewer or PDF
-						if(fmContSettings[json.cont].publicUrl != '') {
-							action = this.parseAction({caption:fmMsg[lang].cmdView,dialog:'fmDocViewer'}, json.cont, item.id);
-						}
-						else if(fmEntries[json.cont][item.id].name.match(/\.pdf$/i)) {
+						if(fmEntries[json.cont][item.id].name.match(/\.pdf$/i)) {
 							action = this.parseAction({caption:fmMsg[lang].cmdView,dialog:'fmPdfViewer'}, json.cont, item.id);
+						}
+						else if(fmContSettings[json.cont].publicUrl != '') {
+							action = this.parseAction({caption:fmMsg[lang].cmdView,dialog:'fmDocViewer'}, json.cont, item.id);
 						}
 						break;
 				}

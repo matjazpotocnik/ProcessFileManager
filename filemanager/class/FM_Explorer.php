@@ -222,6 +222,7 @@ class FM_Explorer {
 				$name = ($name == '') ? '/' : FM_Tools::utf8Encode($name, $this->_FileManager->encoding);
 				$path = $this->_Listing->FileSystem->checkPath($Folder->path);
 				$path = ($path == '') ? '/' : FM_Tools::utf8Encode($path, $this->_FileManager->encoding);
+				//MP shorten names to reduce the size of json
 				$item = "{id:$id,";
 				$item .= 'level:' . (int) $Folder->level . ',';
 				$item .= "name:'" . addslashes($name) . "',";
@@ -280,7 +281,7 @@ class FM_Explorer {
 	public function _checkCacheUpdate() {
 		if(@filemtime($this->_cacheFile) > $this->_lastCacheUpdate) {
 			$folders = $this->_readCache();
-			if(is_array($folders)) {
+			if(is_array($folders) && is_array($this->_folders)) {
 				if(count($folders) != count($this->_folders)) {
 					$this->_folders = $folders;
 					$this->_lastCacheUpdate = time();
@@ -307,7 +308,9 @@ class FM_Explorer {
 	 * @return FM_ExpFolders[]
 	 */
 	protected function _readFolders($dir, $level = 1) {
-		list($items, $cntFiles, $size) = $this->_readFolder($dir);
+		//$this->_FileManager->Log->add("explorer->_readFolders dir=$dir level=$level cntFiles=$cntFiles"); //MP
+		//list($items, $cntFiles, $size) = $this->_readFolder($dir);
+		list($items, $cntFiles, $size) = $this->_readFolder($dir, ($level == 1)); //MP only on first level
 		$dirs = array(new FM_ExpFolder($level, $dir, $cntFiles, $size));
 		$this->_totalSize += $size;
 
@@ -323,10 +326,12 @@ class FM_Explorer {
 	 * read single folder
 	 *
 	 * @param string $dir		directory path
+	 * @param boolean $all return all attributes for a folder/file 
+	 *                     for better performance this is set to true only on first level directory tree //MP
 	 * @return array			directory entries, number of files, folder size
 	 */
-	protected function _readFolder($dir) {
-		$items = $this->_Listing->FileSystem->readDir($dir, true);
+	protected function _readFolder($dir, $all = true) {
+		$items = $this->_Listing->FileSystem->readDir($dir, true, $all); //MP
 		$cntFiles = $size = 0;
 
 		if(is_array($items)) foreach($items as $item) {
@@ -342,6 +347,7 @@ class FM_Explorer {
 						continue;
 					}
 				}
+
 				/* check if system files are allowed */
 				if($item['name'][0] == '.' && $this->_FileManager->hideSystemFiles) {
 					continue;

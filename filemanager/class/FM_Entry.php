@@ -169,12 +169,14 @@ class FM_Entry {
 	 * @var array
 	 */
 	protected $_extensions = array(
-		'text'    => 'txt|[sp]?html?|css|jse?|php\d*|pr?l|pm|cgi|inc|csv|py|asp|ini|sql|cfg|bat|sh|json|xml|xslt?|xsd|xul|rdf|dtd|wsdl|log',
-		'image'   => 'gif|jpe?g|png|w?bmp|tiff?|pict?|ico',
-		'archive' => 'zip|[rtj]ar|t?gz|t?bz2?|arj|ace|lzh|lha|xxe|uue?|iso|cab|r\d+',
-		'program' => 'exe|com|pif|scr|app',
-		'video'   => 'mpe?g|avi|mov|wmv|flv|swf|rm|mp4|3gp|webm|ogv',
-		'audio'   => 'wav|mp[321]|voc|midi?|mod|ac3|wma|m4a|aiff?|au|aac|oga'
+		//MP added code extensions
+		'code'    => '[sp]?html?|php\d*|css|module|inc|json|xml|cpp|h',
+		'text'    => 'txt|[sp]?html?|css|jse?|php\d*|pr?l|pm|inc|csv|py|asp|ini|sql|cfg|bat|sh|json|xml|xslt?|xsd|xul|rdf|dtd|wsdl|log|module|md|config|lock|htaccess|git|gitignore|cpp|h',
+		'image'   => 'gif|jpe?g|png|w?bmp|tiff?|pict?|ico|svg',
+		'archive' => 'zip|[rtj]ar|t?gz|t?bz2?|arj|ace|lzh|lha|xxe|uue?|iso|dmg|cab|r\d+',
+		'program' => 'exe|com|pif|scr|app|jar|dll|cgi|msi|pl|deb|apk|',
+		'video'   => 'mpe?g|avi|mov|wmv|flv|swf|rm|mp4|3gp|webm|ogv|mkv|divx|vid|movie|m4v',
+		'audio'   => 'wav|mp[321]|mp4|mp4a|voc|mid|midi?|mod|ac3|wma|m4a|aiff?|au|aac|oga|fla|flac|ra|rma|aa|aac|aax',
 	);
 
 /* PUBLIC METHODS ****************************************************************************** */
@@ -198,7 +200,7 @@ class FM_Entry {
 	 * @return string
 	 */
 	public function view() {
-		$entry = $this->_viewHeader() . ',';
+		$entry  = $this->_viewHeader() . ',';
 		$entry .= $this->_viewType() . ',';
 		$entry .= $this->_viewIcon() . ',';
 		$entry .= $this->_viewName() . ',';
@@ -300,7 +302,7 @@ class FM_Entry {
 	 * @return integer	0 = no document, 1 = plain text, 2 = Google Docs Viewer
 	 */
 	public function getDocType() {
-		if($this->type == 'text') return 1;
+		if($this->type == 'text' || $this->type == 'code') return 1;
 		$ext = FM_Tools::getSuffix($this->name, '.');
 		return preg_match('/^(' . FM_EXT_GDVIEWER . ')$/i', $ext) ? 2 : 0;
 	}
@@ -486,7 +488,7 @@ class FM_Entry {
 	 * @return string
 	 */
 	protected function _viewIcon() {
-		return "icon:'{$this->icon}.png'";
+		return "icon:'{$this->icon}'";
 	}
 
 	/**
@@ -509,11 +511,13 @@ class FM_Entry {
 		$path = $this->Listing->FileSystem->checkPath($this->path);
 		$dir = preg_replace('%^/$%', '', FM_Tools::dirname($path));
 		$dir = addslashes(FM_Tools::utf8Encode($dir, $this->FileManager->encoding));
+		if($dir == DIRECTORY_SEPARATOR) $dir = '';
 		$fullName = $this->FileManager->hideFilePath ? $name : "$dir/$name";
 
 		if(!$this->FileManager->hideLinkTarget && $this->target != '') {
 			$fullName .= addslashes(' => ' . $this->target);
 		}
+		$fullName = str_replace("\\", "", $fullName); //MP
 		$json = "name:'$name',fullName:'$fullName'";
 		if($this->Listing->searchString != '') $json .= ",dir:'$dir'";
 		return $json;
@@ -604,18 +608,46 @@ class FM_Entry {
 	 * @return string
 	 */
 	protected function _getIcon() {
+		$exttypes = array(
+			'cdup' => 'fmIconDirUp',
+			'dir' => 'fmIconDir',
+			'deleted' => 'fmIconDeleted',
+			'text' => 'fmIconText',
+			'image' => 'fmIconImage',
+			'archive' => 'fmIconArchive',
+			'video' => 'fmIconVideo',
+			'audio' => 'fmIconAudio',
+			'program' => 'fmIconProgram',
+			'code' => 'fmIconCode',
+			'file' => '',
+		);
 		if(!$this->type) $this->type = $this->_getType();
-		if($this->type == 'cdup' || $this->isDir()) return 'folder';
-		$ext = FM_Tools::getSuffix(strtolower($this->name), '.');
-		if($ext == FM_EXT_DELETED) return 'recycle_bin';
-		$icon = $this->FileManager->getIconDir() . '/big/file_extension_' . $ext . '.png';
-		if(is_file($icon)) return 'file_extension_' . $ext;
-		$ext = substr($ext, 0, 3);
-		$icon = $this->FileManager->getIconDir() . '/big/file_extension_' . $ext . '.png';
-		if(is_file($icon)) return 'file_extension_' . $ext;
-		$type = ($this->type == 'text') ? 'txt' : $this->type;
-		$icon = $this->FileManager->getIconDir() . '/big/file_extension_' . $type . '.png';
-		return is_file($icon) ? 'file_extension_' . $type : 'document_yellow';
+		if($this->type == 'cdup') return $exttypes['cdup'];
+		if($this->type == 'dir') return $exttypes['dir'];
+		$i = $exttypes[$this->type];
+		if ($i == '') {
+			$ext = FM_Tools::getSuffix(strtolower($this->name), '.');
+			switch ($ext) {
+				case 'doc':
+				case 'docx':
+					$i = 'fmIconWord';
+					break;
+				case 'xls':
+				case 'xlsx':
+					$i = 'fmIconExcel';
+					break;
+				case 'ppt':
+				case 'pptx':
+					$i = 'fmIconPowerpoint';
+					break;
+				case 'pdf':
+					$i = 'fmIconPdf';
+					break;
+				default:
+					$i = 'fmIconFile';
+			}
+		}
+		return $i;
 	}
 
 	/**
@@ -627,6 +659,7 @@ class FM_Entry {
 		if($this->name == '..' || $this->name == '') return 'cdup';
 		if($this->isDir()) return 'dir';
 		$ext = FM_Tools::getSuffix($this->name, '.');
+		if($ext == FM_EXT_DELETED) return 'deleted';
 
 		foreach($this->_extensions as $key => $types) {
 			if(preg_match('/^(' . $types . ')$/i', $ext)) {

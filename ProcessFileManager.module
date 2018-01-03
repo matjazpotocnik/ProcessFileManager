@@ -1,0 +1,286 @@
+<?php
+
+include_once(/*NoCompile*/__DIR__ . '/filemanager/class/FileManager.php');
+
+/**
+ * File Manager
+ *
+ * A module for managing files and folders. It supports creating, opening (e.g. viewing, playing,
+ * editing), renaming, moving or copying, deleting and searching for files, as well as modifying
+ * file attributes, properties and file permissions. Folders and files may be displayed in a
+ * hierarchical tree based on their directory structure.
+ *
+ * @version 0.0.1
+ * @author Matjaz Potocnik
+ * @author Gerd Tentler
+ * @link https://github.com/matjazpotocnik/ProcessFileManager
+ * @link http://www.gerd-tentler.de/tools/filemanager/
+ *
+ * ProcessWire 2.x/3.x, Copyright 2017 by Ryan Cramer
+ * Licensed under GNU/GPL v2
+ *
+ * https://processwire.com
+ *
+ */
+class ProcessFileManager extends Process implements Module, ConfigurableModule {
+
+	/**
+	 * Module info
+	 *
+	 * @return array
+	 *
+	 */
+	public static function getModuleInfo() {
+		return array(
+			'title'   => 'File Manager',
+			'summary' => _('File manager'),
+			'version' => '0.0.1',
+			'author'  => 'Matja&#382; Poto&#269;nik, Gerd Tentler',
+			'icon'    => 'folder-o',
+			'href'    => 'https://github.com/matjazpotocnik/ProcessFileManager/',
+			'requires'  => 'ProcessWire>=2.5.3, PHP>=5.4.20',
+			'permissions' => array(
+				'file-manager' => _('File manager')
+			),
+			'page' => array(
+				'name'   => 'file-manager',
+				'parent' => 'setup', //admin
+				'title'  => 'File manager'
+			),
+		);
+	}
+
+	/**
+	 * This module config data
+	 * @var array
+	 */
+	protected $configData = array();
+
+	public function init() {
+		parent::init();
+
+		$this->configData = $this->wire('modules')->getModuleConfigData($this);
+	}
+
+	/**
+	 * Module entry point
+	 *
+	 * @param array $options
+	 * @return string html markup or download file
+	 *
+	 */
+	public function ___execute($options = array()) {
+
+		if(!$this->wire('user')->isSuperuser() && !$this->wire('user')->hasPermission('file-manager')) return $this->_('Access denied.');
+
+		$input = $this->wire('input');
+
+		if($input->get('action') !== null) {
+			/**
+			 * This code is part of the FileManager software (www.gerd-tentler.de/tools/filemanager), copyright by
+			 * Gerd Tentler. Obtain permission before selling this code or hosting it on a commercial website or
+			 * redistributing it over the Internet or in any other medium. In all cases copyright must remain intact.
+			 */
+			$container = $input->get('fmContainer');
+
+			if($container != '' && isset($_SESSION[$container])) {
+				$FileManager = unserialize($_SESSION[$container]);
+				$fmMode = (string) $input->get('fmMode');
+				$fmName = (string) $input->get('fmName');
+
+				if(!in_array($fmMode, $FileManager->binaryModes)) {
+					if($FileManager->locale) @setlocale(LC_ALL, $FileManager->locale);
+					header("Content-Type: text/html; charset=UTF-8");
+					header('Cache-Control: private, no-cache, must-revalidate');
+					header('Expires: 0');
+					header('X-Robots-Tag: noindex, nofollow');
+				}
+				ob_start();
+				$FileManager->action();
+				ob_end_flush();
+			}	else {
+				header('X-Robots-Tag: noindex, nofollow');
+				$msg = 'Cannot restore FileManager object from PHP session - ';
+				if($container == '') $msg .= 'fmContainer not set!';
+				else if(!session_id()) $msg .= 'could not create session!';
+				else $msg .= "\$_SESSION['$container'] not found!";
+				FileManager::error($msg);
+			}
+
+			exit(0);
+		}
+
+		$config = $this->wire('config');
+		$path = $config->urls->siteModules . __CLASS__ . '/filemanager/';
+
+		$tmpFilePath = $config->paths->cache . "filemanager";
+		wireMkdir($tmpFilePath);
+
+		$FM = new FileManager($config->paths->root);
+
+		$FM->fmView = $this->configData['fmView'];
+		$FM->explorerWidth = $this->configData['explorerWidth'];
+		$FM->hideTitleBar = $this->configData['hideTitleBar'];
+		$FM->language = $this->configData['language'];
+		if($this->configData['dateTimeFormat'] != '') $FM->dateTimeFormat = $this->configData['dateTimeFormat'];
+
+		$FM->tmpFilePath = $tmpFilePath;
+		$FM->logFilePath = $config->paths->logs;
+		$FM->adminTheme = $this->wire('user')->admin_theme;
+		$FM->defaultFilePermissions = $config->chmodFile;
+		$FM->defaultDirPermissions = $config->chmodDir;
+
+		//$FM->hideFileCnt = true;
+		//$FM->logSave = true;
+		//$FM->publicUrl = ''; //$config->urls->httpRoot;
+		//$FM->uploadEngine = 'php';
+		//$FM->forceFlash = false;
+		//$FM->hideSystemType = true;
+
+		$config->styles->add($path . 'css/filemanager.css');
+		if($this->configData['hideFooter'] == '1') $config->styles->add($config->urls->siteModules . __CLASS__ . '/footer.css');
+
+		$config->scripts->add($path . 'js/tools.js');
+		$config->scripts->add($path . 'js/ajax.js');
+		$config->scripts->add($path . 'js/filemanager.js');
+		$config->scripts->add($path . 'js/parser.js');
+		$config->scripts->add($path . 'ext/uppod/uppod.js');
+
+		$codemirror = $config->urls->siteModules . __CLASS__ . "/codemirror/";
+		$config->scripts->add("{$codemirror}lib/codemirror.js");
+		$config->scripts->add("{$codemirror}mode/clike/clike.js");
+		$config->scripts->add("{$codemirror}mode/xml/xml.js");
+		$config->scripts->add("{$codemirror}mode/javascript/javascript.js");
+		$config->scripts->add("{$codemirror}mode/css/css.js");
+		$config->scripts->add("{$codemirror}mode/htmlmixed/htmlmixed.js"); // depends on XML, JavaScript and CSS modes
+		$config->scripts->add("{$codemirror}mode/php/php.js"); // depends on XML, JavaScript, CSS, HTMLMixed and C-like modes
+		$config->scripts->add("{$codemirror}mode/sql/sql.js");
+		$config->scripts->add("{$codemirror}mode/markdown/markdown.js");
+		$config->scripts->add("{$codemirror}addon/search/search.js"); // https://codemirror.net/demo/search.html
+		$config->scripts->add("{$codemirror}addon/search/searchcursor.js");
+		$config->scripts->add("{$codemirror}addon/search/jump-to-line.js");
+		$config->scripts->add("{$codemirror}addon/dialog/dialog.js");
+		$config->scripts->add("{$codemirror}addon/selection/active-line.js");
+		$config->scripts->add("{$codemirror}addon/edit/matchbrackets.js");
+		$config->scripts->add("{$codemirror}addon/fold/foldcode.js");
+		$config->scripts->add("{$codemirror}addon/fold/foldgutter.js");
+		$config->scripts->add("{$codemirror}addon/fold/brace-fold.js");
+		$config->scripts->add("{$codemirror}addon/fold/xml-fold.js");
+		$config->scripts->add("{$codemirror}addon/fold/indent-fold.js");
+		$config->scripts->add("{$codemirror}addon/fold/markdown-fold.js");
+		$config->scripts->add("{$codemirror}addon/fold/comment-fold.js");
+		$config->styles->add ("{$codemirror}lib/codemirror.css");
+		$config->styles->add ("{$codemirror}addon/dialog/dialog.css");
+		$config->styles->add ("{$codemirror}addon/fold/foldgutter.css");
+		//if($this->theme != "default") $config->styles->add ("{$codemirror}theme/{$this->theme}.css");
+
+		$out = "<div id='fmWrapper' style='width:100%; height:100%;'>"; // do not remove this line, leave the styles !!!
+		$out .= $FM->create();
+		$out .= "</div>";
+
+		return $out;
+	}
+
+	/**
+	 * Module fields
+	 *
+	 * @param array $data config data
+	 * @return InputfieldWrapper
+	 *
+	 */
+	public function getModuleConfigInputfields(array $data) {
+
+		$fields = new InputfieldWrapper();
+		$modules = $this->wire('modules');
+
+		$defaults = array(
+			'fmView' => 'details',
+			'explorerWidth' => '25%',
+			'hideTitleBar' => '0',
+			'hideTitleBar' => '0',
+			'language' => 'en',
+			'dateTimeFormat' => '%Y-%m-%d %H:%M:%S',
+			'hideFooter' => '0',
+		);
+
+		$f = $modules->get('InputfieldSelect');
+		$f->name = 'explorerWidth';
+		$f->label = $this->_('Show the explorer window?');
+		$f->columnWidth = 33;
+		$f->required = true;
+		$f->addOption('25%', $this->_('Yes'));
+		$f->addOption('0', $this->_('No'));
+		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$fields->add($f);
+
+		$f = $modules->get('InputfieldSelect');
+		$f->name = 'hideTitleBar';
+		$f->label = $this->_('Show the title bar?');
+		$f->columnWidth = 33;
+		$f->required = true;
+		$f->addOption('0', $this->_('Yes'));
+		$f->addOption('1', $this->_('No'));
+		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$fields->add($f);
+
+		$f = $modules->get('InputfieldSelect');
+		$f->name = 'hideFooter';
+		$f->label = $this->_('Show admin theme footer?');
+		$f->columnWidth = 34;
+		$f->required = true;
+		$f->addOption('0', $this->_('Yes'));
+		$f->addOption('1', $this->_('No'));
+		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$fields->add($f);
+
+		$f = $modules->get('InputfieldSelect');
+		$f->name = 'fmView';
+		$f->label = $this->_('Default view:');
+		$f->columnWidth = 33;
+		$f->required = true;
+		$f->addOption('details', $this->_('Details'));
+		$f->addOption('icons', $this->_('Icons'));
+		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$fields->add($f);
+
+		$f = $modules->get('InputfieldSelect');
+		$f->name = 'language';
+		$f->label = $this->_('Language:');
+		$f->columnWidth = 33;
+		$f->required = true;
+		$f->addOption('en', 'English');
+		$f->addOption('de', 'Deutch');
+		$f->addOption('es', 'Español');
+		$f->addOption('fi', 'Suomi');
+		$f->addOption('fr', 'Français');
+		$f->addOption('hu', 'Magyar');
+		$f->addOption('it', 'Italiano');
+		$f->addOption('pl', 'Polski');
+		$f->addOption('pt', 'Português');
+		$f->addOption('ru', 'Русский');
+		$f->addOption('tr', 'Türkçe');
+		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$fields->add($f);
+
+		$f = $modules->get('InputfieldText');
+		$f->name = 'dateTimeFormat';
+		$f->label = $this->_('Date/time format:');
+		$f->columnWidth = 34;
+		$f->required = true;
+		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$fields->add($f);
+
+		return $fields;
+	}
+
+	/**
+	 * Check for mbstring, iconv, exec and scandir support.
+	 *
+	 */
+	public function ___install() {
+		parent::___install();
+		if(!extension_loaded('mbstring') || !function_exists('iconv')) $this->message("Support for mbstring and iconv is recommended.");
+		//if(!function_exists("scandir")) $this->error('scandir function does not exist.');
+	}
+
+}

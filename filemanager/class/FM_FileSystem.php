@@ -294,16 +294,18 @@ class FM_FileSystem {
 	 *
 	 * @param string $path		directory path
 	 * @param boolean $noLog	optional: don't generate log message
+	 * @param boolean $all return all attributes for a folder/file (for better performance) //MP
 	 * @return mixed			entries or false
 	 */
-	public function readDir($path, $noLog = false) {
+	public function readDir($path, $noLog = false, $all = true) {
 		$Directory = new FM_Directory($this->_FileManager, $path, $this->_checkFtp());
-		$list = $Directory->read();
+		$list = $Directory->read($all); //MP
 		$path = $this->checkPath($path);
 		if(!$path) $path = '/';
 
 		if(is_array($list)) {
-			if(!$noLog) $this->_Log->add("Read directory $path");
+			$c = count($list);//MP
+			if(!$noLog) $this->_Log->add("Read directory $path - $c items"); //MP
 			return $list;
 		}
 		$this->_Log->add("Could not read directory $path", 'error');
@@ -561,54 +563,26 @@ class FM_FileSystem {
 		$errno = $errstr = '';
 		if(!strstr($url, '://')) $url = 'http://' . $url;
 		$urlParts = @parse_url($url);
-		$path = $urlParts['path'] . ($urlParts['query'] ? '?' . $urlParts['query'] : '');
-		$path = str_replace(' ', '%20', $path);
-		$port = $urlParts['port'] ? $urlParts['port'] : 80;
+		if($urlParts === false
+			|| !is_array($urlParts)
+			|| !array_key_exists('path', $urlParts)
+			|| !array_key_exists('host', $urlParts)
+			|| !filter_var($url, FILTER_VALIDATE_URL)
+			) {
+			$this->_Log->add('Invalid url: ' . $url, 'error');
+			return false;
+		}
+
+		//$path = $urlParts['path'] . (array_key_exists('query', $urlParts) ? '?' . $urlParts['query'] : '');
+		//$path = str_replace(' ', '%20', $path);
+		//$port = array_key_exists('port', $urlParts) ? $urlParts['port'] : 80;
+		//if($urlParts['scheme'] == 'https') $port = 443;
+
 		$filename = FM_Tools::getSuffix($urlParts['path'], '/');
 		$dstPath = $dstDir . '/' . $filename;
-		$ok = false;
 
-		if($sp = @fsockopen($urlParts['host'], $port, $errno, $errstr, 15)) {
-			fputs($sp, "GET $path HTTP/1.1\r\n");
-			fputs($sp, "Host: {$urlParts['host']}\r\n");
-			fputs($sp, "Connection: close\r\n\r\n");
+		return file_put_contents($dstPath, file_get_contents($url));
 
-			if($fp = @fopen($dstPath, 'wb')) {
-				$buffer = '';
-				$headerFound = false;
-				$ok = true;
-
-				while(!@feof($sp)) {
-					$buffer .= @fread($sp, 4096);
-					if(preg_match('/^HTTP\/[\d\.]+ (\d+) ([\w ]+)/i', $buffer, $m)) {
-						if($m[1] != 200) {
-							$errstr = "Host returned \"$m[1] $m[2]\"";
-							$ok = false;
-							break;
-						}
-					}
-
-					if($headerFound) {
-						@fwrite($fp, $buffer);
-						$buffer = '';
-					}
-					else {
-						$headerEnd = strpos($buffer, "\r\n\r\n");
-						if($headerEnd !== false) {
-							$headerFound = true;
-							@fwrite($fp, substr($buffer, $headerEnd + 4));
-							$buffer = '';
-						}
-					}
-				}
-				@fclose($fp);
-				if($ok) $this->_Log->add("Got file $filename");
-			}
-			else $this->_Log->add("Could not open file $filename", 'error');
-			@fclose($sp);
-		}
-		if($errstr) $this->_Log->add('Could not read data: ' . trim($errstr), 'error');
-		return $ok;
 	}
 
 	/**

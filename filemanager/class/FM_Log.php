@@ -123,7 +123,8 @@ class FM_Log {
 		if($type == 'error') $this->_lastErrorText = $text;
 
 		if($this->_logDir != '' && $type != 'info') {
-			$file = $this->_logDir . '/' . $this->_prefix . @date('Y-m-d') . '.log';
+			//$file = $this->_logDir . '/' . $this->_prefix . @date('Y-m-d') . '.log';
+			$file = $this->_logDir . 'filemanager.txt'; //MP PW already adds trailing slash
 			$line = sprintf("%s  %s  %s\n", $time, $ip, $text);
 			$ok = FM_Tools::saveLocalFile($file, $line, true);
 			if(!$ok) $this->_messages[] = "{type:'error',time:'$time',ip:'$ip',text:'Could not write to logfile'}";

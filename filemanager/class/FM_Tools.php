@@ -168,6 +168,110 @@ abstract class FM_Tools {
 		return $perms;
 	}
 
+	//MP not used
+	public static	function is__executable($file) {
+		$e = @is_executable($file);
+		$ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+		if($e || $ext == 'msi' || $ext == 'bat' || $ext == 'com') return true;
+		return false;
+	}
+
+	//MP not used
+	public static function is__writable($path, $dir = null, $mtime = null) {
+		if(@is_dir($path)) {
+			$pathOld = realpath($path);
+			$path = $pathOld . DIRECTORY_SEPARATOR . uniqid(mt_rand()) . '.tmp';
+			return self::is__writable($path, $pathOld, @filemtime($pathOld));
+		}
+		$rm = @file_exists($path);
+		$f = @fopen($path, 'a'); //this changes the modification date!
+		if($f === false) return false;
+		@fclose($f);
+		if(!$rm) {
+			@unlink($path);
+			if($dir != null && $mtime != null) @touch($dir, $mtime); //return modification time to original
+		}
+		return true;
+	}
+
+	/**
+	 * Get file permissions on windows.
+	 *
+	 * @param string $file full file/directory path
+	 * @param bool $isDir if path is directory or not, for performance reasons
+	 * @return string
+	 */
+	public static function getPermissionsWin($file, $isDir) {
+		/*
+										Meaning for Folders																		Meaning for Files
+		Read						Permits viewing and listing of files and subfolders		Permits viewing or accessing of the file's contents
+		Write						Permits adding of files and subfolders								Permits writing to a file
+		Read & Execute	Permits viewing and listing of files and subfolders		Permits viewing and accessing of the file's contents
+										as well as executing of files; inherited by files			as well as executing of the file
+										and folders
+		*/
+
+		if($isDir) {
+			$isReadable = is_readable($file);
+			//$isReadable = (@opendir($file) === false) ? false : true; // opendir is not much faster
+			$isWritable = is_writable($file);
+			//$isExecutable = is_executable($file); // always false
+			$isExecutable = $isReadable; // let assume read is equal execute
+		} else {
+			//$isReadable = (@fopen($file, 'r') === false) ? false : true;
+			// if file is not readble, you get an error in php log file, also it's not much faster
+			$isReadable = is_readable($file);
+			$isWritable = is_writable($file);
+			$isExecutable = $isReadable ? is_executable($file) : false;
+		}
+
+		$perms = '---';
+		if($isReadable)   $perms[0] = 'R';
+		if($isWritable)   $perms[1] = 'W';
+		if($isExecutable) $perms[2] = 'X';
+
+		return $perms;
+	}
+
+	/**
+	 * Get acl data, owner and permissions on windows. Uses fileacl.exe executable
+	 *
+	 * @param string $file full file/directory path
+	 * @return string
+	 */
+	public static function getAcl($file) {
+
+		$owner = $acl = 'unknown';
+		$command = '"' . __DIR__ . '\fileacl.exe" "' . realpath($file) . '" /simple /owner';
+
+		exec($command, $output, $result);
+
+		if($result == 127) {
+			return '"error":"command not found"';
+		} else if($result != 0) {
+			return '"error":"command failed: ' . $result . '"';
+		} else {
+			if(count($output) > 0) {
+				$acl = '';
+				foreach($output as $line) {
+					//$file;domain\username:RWXD
+					$line = explode(';', $line)[1];
+					$line = str_replace("\\", "\\\\", $line);
+					if(strpos($line, 'OWNER=') !== false) {
+						$owner = explode('=', $line)[1];
+					} else {
+						$acl .= $line . '<br>';
+					}
+				}
+				$acl = substr($acl, 0, -4); // remove last <br>
+			}
+		}
+
+		$perms = self::getPermissionsWin($file, is_dir($file));
+
+		return "owner:\"" . $owner . "\", acl:\"" . $acl . "\", perms:\"" . $perms . "\"";
+	}
+
 	/**
 	 * call URL
 	 *
@@ -351,10 +455,10 @@ abstract class FM_Tools {
 	/**
 	 * substr() that works also with UTF-8 strings
 	 *
-	 * @param string $str			the string
+	 * @param string $str				the string
 	 * @param integer $start		start position
 	 * @param integer $length		optional: number of characters
-	 * @return string				the substring
+	 * @return string						the substring
 	 */
 	public static function substr($str, $start, $length = null) {
 		if(self::isUtf8($str)) {
@@ -503,7 +607,7 @@ abstract class FM_Tools {
 	 */
 	public static function getMsg($token, $val = '') {
 		global $msg, $fmEncoding, $fmCnt;
-		return $msg[$token] . (($val != '') ?  ': ' . self::utf8Encode($val, $fmEncoding[$fmCnt]) : '');
+		return $msg[$token] . (($val != '') ? ': ' . self::utf8Encode($val, $fmEncoding[$fmCnt]) : '');
 	}
 
 	/**
@@ -536,6 +640,63 @@ abstract class FM_Tools {
 			$mask >>= 8;
 		}
 		return $out;
+	}
+
+	/**
+	 * Try to detect line endings based on presence of \r\n cahracters.
+	 *
+	 * @param string $content
+	 * @return string "win", "nix", "mac" or ""
+	 *
+	 */
+	public static function detect_newline_type($content) {
+		//https://stackoverflow.com/questions/11066857/detect-eol-type-using-php
+		$arr = array_count_values(
+							explode(
+								' ',
+								preg_replace(
+									'/[^\r\n]*(\r\n|\n|\r)/',
+									'\1 ',
+									$content
+								)
+							)
+					);
+		arsort($arr);
+		$k = key($arr);
+		if($k == "\r\n") return "win";
+		if($k == "\n") return "nix";
+		if($k == "\r") return "mac";
+		return "";
+	}
+
+	/**
+	 * Handles changing line endings to the required style.
+	 *
+	 * @param string $content file content
+	 * @param string $lineEnding original file's line ending
+	 * @return string
+	 *
+	 */
+	public static function handleLineEndings($content, $lineEnding = '') {
+		$target_ending = 'auto'; //default
+
+		if($target_ending == 'none') return $content;
+		if($target_ending == 'auto') $target_ending = $lineEnding;
+
+		//$currentLineEnding = self::detect_newline_type($content);
+		$currentLineEnding = 'nix'; //input is always in unix
+		if($currentLineEnding == 'win') {
+			if($target_ending == 'mac') return str_replace("\n", '',     $content);
+			if($target_ending == 'nix') return str_replace("\r", '',     $content);
+		} else if($currentLineEnding == 'mac') {
+			if($target_ending == 'win') return str_replace("\r", "\r\n", $content);
+			if($target_ending == 'nix') return str_replace("\r", "\n",   $content);
+		} else if($currentLineEnding == 'nix') {
+			if($target_ending == 'win') return str_replace("\n", "\r\n", $content);
+			if($target_ending == 'mac') return str_replace("\n", "\r",   $content);
+		}
+
+		return $content;
 	}
 }
 

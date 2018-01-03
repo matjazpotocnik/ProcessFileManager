@@ -4,94 +4,578 @@
  redistributing it over the Internet or in any other medium. In all cases copyright must remain intact.
 *********************************************************************************************************/
 
-/*********************************************************************************************************
- general
-*********************************************************************************************************/
+/* already part of all themes
 * {
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
-.fmBody {
+*/
+
+/*** layout ***/
+#fmWrapper,
+/*#fmWrapper input[type=text],
+#fmWrapper input[type=submit],
+#fmWrapper input[type=file],*/
+#fmWrapper input,
+#fmWrapper td,
+#fmWrapper label {
+	font-size: 13px; /*!important;*/
+}
+#fmWrapper table {
+	margin: 0 !important;
+	border-collapse: collapse !important;
+  border-spacing: 0 !important;
+}
+.fmCont {
+	position: relative;
+	line-height: normal;
+	font-weight: normal;
+}
+.fmCont img {
+	display: inline;
+	vertical-align: middle;
+}
+.fmContBody {
+	overflow: auto;
+}
+.fmContTable {
+	border: 1px solid transparent; /* required */
+	visibility: hidden; /* will be unhidden later in javascript */
+}
+.fmContBodyTable {
 	width: 100%;
-	height: 100%;
+}
+.fmContBodyTable td,
+.fmContDetHead > div {
+	border-right: 1px solid transparent;
+}
+.fmContBodyTable td:last-child,
+.fmContDetHead > div:last-child {
+	border-right: none;
+}
+.fmContBodyTable tr {
+	border-bottom: 1px solid transparent;
+	cursor: pointer;
+	text-align: center;
+	vertical-align: top;
+}
+/*.fmContBodyTable tr:last-child {
+	border-bottom: none;
+}*/
+.fmContBodyTableIcons {
+	border: none;
+	width: 100%;
+}
+.fmContBodyTableIconsTr {
+	border-bottom: 1px solid transparent;
+}
+.fmContBodyTableIconsTd {
+	cursor: pointer;
+	text-align: center;
+	border-right: 1px solid transparent;
+}
+.fmContBodyTableIconsEmpty {
+	border-color: transparent;
+}
+.fmContBodyTableIconsTd div {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	vertical-align: middle;
+	margin: 0 auto;
+	padding: 0 2px 2px 2px;
+}
+.fmContBodyTable input[checbox] {
 	margin: 0;
-	background-color: #F0F0F0;
+}
+.fmContBodyTable td div {
+	padding-left: 4px;
+	padding-right: 4px;
+	overflow: hidden;
+}
+
+/***
+ heights
+ when you change the heights here, you have to change the heights in parser.js:
+ fmContDetHeadHeight   is the title height in the main area (on the right)
+ fmExplorerTitleHeight is the title height in the directory tree (on the left)
+***/
+.fmContBodyTable tr,
+.fmContBodyTable td,
+.fmContDetHead,
+.fmExplorerTitle,
+.fmContDetHead > div {
+	height: 25px;
+	line-height: 25px;
+}
+.fmContTableExp {
+	/* the wrapper div for the explorer window */
+	/* set just line-height to 1 px less than .fmContBodyTable tr and td */
+	/* important is needed ! */
+	line-height: 24px !important;
+}
+.fmExplorer,
+.fmExplorerActive {
+	/* row with the folder name for the explorer window */
+	/* set height and line-height to 1 px more than than .fmContBodyTable tr and td */
+	line-height: 26px;
+	height: 26px;
+}
+.fmContDetHead {
+	white-space: nowrap;
+	border-bottom: 1px solid transparent; /* for the table scrollbar in main window */
+	cursor: pointer;
+}
+.fmContDetHead > div {
+	display: inline-block; /* required */
+	overflow: hidden;
+	text-align: center;
+}
+.disabled_fmContDetHead i {
+	/* position of the sort fa icons for the main window table header, depends on what icon is used for sort */
+  /*position: relative;
+  top: 3px;*/
+}
+.fmExplorer,
+.fmExplorerActive,
+.fmExplorerTitle {
+	display: block;
+	text-align: left;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.fmExplorerFileCnt {
+	font-size: 11px;
+}
+.fmExplorer,
+.fmExplorerActive,
+.fmExplorerTitle {
+	border-width: 0;
+	border-bottom-width: 1px;
+	border-bottom-color: transparent;
+	border-bottom-style: solid;
+}
+.fmExplorer i,
+.fmExplorerContent i,
+.fmExplorerActive i {
+	margin-right: 2px;
+	/*font-size: 12px !important;*/
+  width: 1.28571429em;
+  text-align: center;
+}
+.fmExplorerTitle {
+	padding-left: 4px;
+}
+
+/*** design ***/
+.fmContTable {
+	/* the whole table, left is the explorer window (folders list), right is the main window */
+	/* don't change the border width, just the color */
+	/*border-color: gold;*/ /* for testing */ /* #d9e1ea; */ /*#405BA2;*/
+	/*border-style: dotted;*/ /* for testing */
+	/* as an alternative, the backround color may be used, the border wins */
+	/*background-color: green;*/ /* for testing */
+	border-color: #ddd;
+}
+.fmContTableLeft {
+	/* left column, explorer window with folders */
+	/*border: 2px solid maroon;*/ /* for testing */
+	border-right: 1px solid #ddd; /* match with the color of .fmContTable */
+}
+.fmContTableExp {
+	/* explorer window, inner div */
+	/*background-color: red !important;*/ /* for testing */
+}
+.fmContTableRight {
+	/* right column, main window with folders and files */
+	/*border: 2px solid blue;*/ /* for testing */
+}
+.fmContTableList {
+	/* main window, inner div */
+	/*border: 2px solid fuchsia;*/ /* for testing */
+}
+.fmContBodyTable,
+.fmContBodyTableIcons {
+	/* the background color for the main window */
+	/* it's better to just set the background color on .fmContTableRight */
+	/*background-color: lightyellow;*/ /* for testing */
+}
+.fmContBodyTable td,
+.fmContDetHead > div {
+	/* border on the table columns for the main window */
+	/* set just the color and sytle of the right border, if needed */
+	border-right-color: #eee; /* for testing */
+	border-right-style: solid; /* for testing */
+}
+.fmContBodyTable tr {
+	/* border on the table rows for the main window */
+	/* set just the color and style for the bottom border, if needed */
+	border-bottom-color: #ddd; /* for testing */
+	border-bottom-style: solid; /* for testing */
+}
+.fmContBodyTable tr:hover,
+.fmContBodyTableIconsTd:hover {
+	/* hover color for the main window for the details view and the icons view */
+	background-color: #ddd;
+}
+.fmContBodyTableIconsTr {
+	/* border in the icons view */
+	/* set just the color and style of the bottom border, if needed */
+	border-bottom-color: #ddd; /* for testing */
+	border-bottom-style: solid; /* for testing */
+}
+.fmContBodyTableIconsTd {
+	/* border in the icons view */
+	/* set just the color and style of the right border, if needed */
+	border-right-color: #ddd; /* for testing */
+	border-right-style: solid; /* for testing */
+}
+.fmContBodyTable i {
+	/* color of the file type fa icons in the main window */
+	/*color: LightSeaGreen;*/ /* for testing */
+}
+.fmContDetHead {
+	/* table header for the main window */
+	background-color: #999; /* for testing */
+	color: #fff;
+	font-weight: bold;
+}
+.fmContDetHead > div:hover {
+	/* hover color for the table header for the main window */
+	background-color: #666;
+	/*color: crimson !important;*/ /* for testing */
+}
+.fmContentNew {
+	color: #b00;
+}
+.fmContentDisabled {
+	color: #aaa;
+}
+.fmContentDeleted {
+	text-decoration: line-through;
+}
+.fmExplorer {
+	/* the background color of the row for the explorer window */
+	/* better set the background color on the .fmContTableLeft */
+	/*background-color: teal;*/ /* for testing */
+}
+.fmExplorerActive {
+	/* the background color of the active row for the explorer window */
+	background-color: #d9e1ea;
+}
+.fmExplorer:hover,
+.fmExplorerActive:hover {
+	background-color: #9eb8d2;
+}
+.fmExplorerFileCnt {
+	/* the color for the number of files in the directory for the explorer window */
+	color: #666;
+}
+.fmExplorer,
+.fmExplorerActive {
+	/* don't change border width, just color and style */
+	/*border-color: green;*/ /* for testing */
+	/*border-style: dashed;*/ /* for testing */
+}
+.fmExplorer i,
+.fmExplorerContent i,
+.fmExplorerActive i {
+	/* the color of fa icons */
+	/*color: coral;*/ /* for testing */
+}
+.fmExplorerTitle {
+	/* the ciolor for the explorer window title, don't change border width */
+	border-bottom-color: #aaa;
+	color: #fff;
+	background-color: #999;
+	/*border-right: 1px solid #eee;*/ /* match with the color of .fmContDetHead > div */
 }
 
 /*********************************************************************************************************
- content
+ icons
 *********************************************************************************************************/
-.fmContent, .fmContentDisabled, .fmContentNew {
-	font-family: "Trebuchet MS", Arial, Helvetica;
-	font-size: 11px;
+#fmWrapper i {
+	display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
 }
-.fmContent {
-	color: #000000;
-	font-weight: normal;
+.fmIconDir:before,
+.fmIconDirClose:before {
+	content: "\f114"; /* fa-folder-o */
 }
-.fmContentDisabled {
-	color: #A0A0A0;
-	font-weight: normal;
+.fmIconDirOpen:before {
+	content: "\f115"; /* fa-folder-open-o */
 }
-.fmContentNew {
-	color: #D00000;
-	font-weight: bold;
+.fmIconDirUp:before {
+  content: "\f077"; /* fa-chevron-up */
+  content: "\f148"; /* fa-level-up */
 }
-.fmThumbnail {
-	background-image: url(../icn/mediaLoading.gif);
-	background-position: center;
-	background-repeat: no-repeat;
+.fmIconDirChange:before {
+	content: "\f05b"; /* fa-crosshairs */
+	content: "\f101"; /* fa-angle-double-right */
+	content: "\f149"; /* fa-level-down */
+}
+.fmIconTreeOpen:before {
+  content: "\f078"; /*fa-chevron-down	*/
+}
+.fmIconTreeClose:before {
+  content: "\f054"; /* fa-chevron-right */
+}
+.fmIconDeleted:before,
+.fmIconDelete:before {
+	content: "\f056"; /* fa-minus-circle */
+	content: "\f014"; /* fa-trash-o */
+}
+.fmIconText:before {
+	content: "\f0f6"; /* fa-file-text-o */
+	color: #369a7f;
+}
+.fmIconFile:before {
+	content: "\f016"; /* fa-file-o */
+}
+.fmIconImage:before {
+	content: "\f1c5"; /* fa-file-image-o */
+	color: #e6b205;
+}
+.fmIconArchive:before {
+	content: "\f1c6"; /* fa-file-archive-o */
+}
+.fmIconAudio:before {
+	content: "\f1c7"; /* fa-file-audio-o */
+}
+.fmIconVideo:before {
+	content: "\f1c8"; /* fa-file-video-o */
+}
+.fmIconProgram:before,
+.fmIconCode:before {
+	content: "\f1c9"; /* fa-file-code-o */
+	color: #369a7f;
+}
+.fmIconPdf:before {
+	content: "\f1c1"; /* fa-file-pdf-o */
+	color: #f00;
+}
+.fmIconWord:before {
+	content: "\f1c2"; /* fa-file-word-o */
+	color: #2b5796;
+}
+.fmIconExcel:before {
+	content: "\f1c3"; /* fa-file-Excel-o */
+	color: #1e7145;
+}
+.fmIconPowerpoint:before {
+	content: "\f1c4"; /* fa-file-powerpoint-o */
+	color: #d14424;
+}
+.fmIconSortDesc:before {
+	/* "\f15e" fa-sort-alpha-desc */
+	content: "\f0dd"; /* fa-sort-desc */
+	content: "\f0d7"; /* fa-caret-down */
+}
+.fmIconSortAsc:before {
+	/* "\f15d" fa-sort-alpha-asc */
+	content: "\f0de"; /* fa-sort-asc */
+	content: "\f0d8"; /* fa-caret-up */
+}
+.fmIconMenu:before {
+	/* actions icon at the top right */
+  content: "\f0c9"; /* fa-bars */
+}
+.fmIconViewIcons:before {
+  content: "\f00a"; /* fa-th */
+}
+.fmIconViewDetails:before {
+  content: "\f00b"; /* fa-th-list */
+}
+.fmIconRefresh:before {
+  content: "\f021"; /* fa-refresh */
+}
+.fmIconTrashbinOpen:before,
+.fmIconTrashbinClosed:before,
+.fmIconTrashbin:before {
+	content: "\f014"; /* fa-trash-o */
+	content: "\f01e"; /* fa-repeat */
+	content: "\f0e2"; /* fa-undo */
+	content: "\f074"; /* fa-random */
+}
+.fmIconRecycle:before {
+	content: "\f1b8"; /* fa-recycle */
+}
+.fmIconSearch:before {
+	content: "\f002"; /* fa-search */
+}
+.fmIconUpload:before {
+	content: "\f093"; /* fa-upload */
+}
+.fmIconDownload:before,
+.fmIconDownloadUrl:before {
+	content: "\f019"; /* fa-download */
+}
+.fmIconPlus:before {
+	content: "\f067"; /* fa-plus */
+}
+.fmIconCopy:before {
+	content: "\f0c5"; /* fa-files-o */
+	content: "\f079"; /* fa-retweet */
+}
+.fmIconMove:before {
+	content: "\f0c5"; /* fa-files-o */
+}
+.fmIconRename:before {
+	/* fa-pencil or fa-pencil-square-o ? */
+	content: "\f101"; /* fa-angle-double-right */
+}
+.fmIconInfo:before {
+	content: "\f05a"; /* fa-info-circle */
+	content: "\f129"; /* fa-info */
+}
+.fmIconClose:before {
+	content: "\f00d"; /* fa-times */
+}
+.fmIconPermissions:before {
+	content: "\f023"; /* fa-lock */
+}
+.fmIconEdit:before {
+	content: "\f044"; /* fa-pencil-square-o */
+	content: "\f040"; /* fa-pencil */
+}
+.fmIconView:before {
+	content: "\f00e"; /* fa-search-plus */
+}
+.fmIconFileCreate:before {
+	content: "\f016"; /* fa-file-o */
+}
+.fmIconFolderAdd:before {
+	content: "\f114"; /* fa-folder-o */
+}
+.fmIconHtml5:before {
+	content: "\f13b"; /* fa-html5 */
+	position: relative;
+	top: 1px;
+}
+.fmIconRotateRight:before {
+	content: "\f01e"; /* fa-repeat */
+}
+.fmIconArrowRight:before {
+	content: "\f101"; /* fa-angle-double-right */
+}
+.fmIconRotateLeft {
+	-webkit-transform: scale(-1, 1);
+  -ms-transform: scale(-1, 1);
+  transform: scale(-1, 1) !important;
+}
+.fmIconRotateLeft:before {
+	content: "\f01e"; /* fa-repeat */
+}
+.fmIconPlay:before {
+	content: "\f01d"; /* fa-play-circle-o */
+}
+.fmIconFlash:before {
+	content: "\f001"; /* fa-music */
+	position: relative;
+	top: 1px;
+}
+.fmIconSave:before {
+ 	content: "\f0c7"; /* fa-floppy-o */
+}
+.fmIconBlank:before {
+  content: "\f078"; /* fa-chevron-down - whatever */
+	visibility: hidden;
+}
+.fmIconSpinner,
+.fmIconMediaLoading {
+	-webkit-animation: fa-spin 2s infinite linear;
+  animation: fa-spin 2s infinite linear;
+}
+.fmIconSpinner:before,
+.fmIconMediaLoading:before {
+	content: "\f110"; /* fa-spinner	*/
+}
+.fmIconHome:before {
+	content: "\f015"; /* fa-home */
+}
+.fmIconSaveIndicator:before {
+	content: "\f069"; /* fa-asterisk */
+}
+.fmIcon_dimmed {
+	opacity: .5;
+}
+.fmIcon_large {
+	font-size: 3em !important;
+}
+.fmIcon_centered {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+}
+/*.fa-fw {
+  width: 1.28571429em;
+  text-align: center;
+}*/
+
+
+/*********************************************************************************************************
+ right click menu
+*********************************************************************************************************/
+/*** layout ***/
+.fmMenuTitle,
+.fmMenuItem,
+.fmMenuItemDisabled {
+	padding: 1px 6px;
 }
 .fmMenuTitle {
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 10px;
+	font-size: 12px !important;
+	width: 190px;
+}
+
+/*** design ***/
+.fmMenuTitle {
 	font-weight: bold;
-	background-color: #F0F8FF;
-	color: #000080;
+	background-color: #eaf0f2;
+	color: inherit;
 }
 .fmMenuBorder {
-	border-top: 1px solid #405BA2;
-	border-bottom: 1px solid #405BA2;
-}
-.fmMenuItem {
-	font-family: "Trebuchet MS", Arial, Helvetica;
-	font-size: 11px;
-	color: #000080;
+	border-top: 1px solid #2F4248;
+	border-bottom: 1px solid #2F4248;
 }
 .fmMenuItemDisabled {
-	font-family: "Trebuchet MS", Arial, Helvetica;
-	font-size: 11px;
 	color: #A0A0A0;
+}
+.fmMenuTR {}
+.fmMenuTD,
+.fmMenuTR:hover {
+	background-color: #C0C0C0;
 }
 
 /*********************************************************************************************************
  hyperlinks
 *********************************************************************************************************/
 .fmLink, .fmLink:active, .fmLink:visited {
-	color: #000000;
+	color: inherit;
 	text-decoration: none;
+	cursor: pointer;
 }
 .fmLink:hover {
 	text-decoration: underline;
-	color: #0000FF;
 }
 
 /*********************************************************************************************************
  error and log messages, debug info
 *********************************************************************************************************/
 .fmError {
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 12px;
-	font-weight: bold;
-	padding: 2px;
-	text-align: center;
-	border: 1px dashed #D00000;
-	color: #D00000;
-	background-color: #FFF0E0;
+	font-weight: bold !important;
+	text-align: center !important;
+	background-color: #D00 !important;
+	color: #fff !important;
+	z-index: 10002;
+	border-top: none !important;
 }
 .fmLogDefault, .fmLogInfo, .fmLogError {
-	font-family: Verdana, Arial, Helvetica;
 	font-size: 10px;
 	font-weight: normal;
 }
@@ -99,7 +583,7 @@
 	color: #00B000;
 }
 .fmLogInfo {
-	color: #0000FF;
+	color: #00f;
 }
 .fmLogError {
 	color: #FF4040;
@@ -108,175 +592,100 @@
 	background-color: #F0F8FF;
 }
 .fmSearchResult {
-	font-family: "Trebuchet MS", Arial, Helvetica;
 	font-size: 11px;
 	background-color: #FFFFD0;
 }
 .fmDebugInfo {
-	background-color: white;
+	background-color: #FFF;
 	color: #808080;
 	border: 1px dashed #808080;
 	padding: 2px;
 	text-align: left;
-	font-family: Verdana, Arial, Helvetica;
 	font-size: 10px;
-}
-
-/*********************************************************************************************************
- forms, fields and buttons
-*********************************************************************************************************/
-.fmForm {
-	margin: 0;
-}
-.fmField {
-	font-family: "Courier New", Courier;
-	font-size: 12px;
-	font-weight: normal;
-	border: 2px inset #FFFFFF;
-}
-.fmButton {
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 11px;
-	font-weight: bold;
-	margin-top: 4px;
-	width: 100px;
-}
-
-/*********************************************************************************************************
- table header cells
-*********************************************************************************************************/
-.fmTH1, .fmDialog, .fmDialogTitle {
-	cursor: default;
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 12px;
-	font-weight: bold;
-	color: #FFFFFF;
-	background-color: #405BA2;
-}
-.fmTH2 {
-	cursor: default;
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 10px;
-	color: #000000;
-	background-color: #C0D0F0;
-}
-.fmTH3 {
-	cursor: default;
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 10px;
-	font-weight: bold;
-	color: #FFFFFF;
-	padding: 2px;
-	border: 1px outset #FFFFFF;
-	background-color: #708BD2;
-	margin-left: 1px;
-	text-align: center;
-	white-space: nowrap;
-}
-.fmTH4 {
-	cursor: pointer;
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 10px;
-	font-weight: bold;
-	padding: 2px;
-	border: 1px outset #FFFFFF;
-	color: #FFFFFF;
-	background-color: #A0B0D0;
-	margin-left: 1px;
-	text-align: center;
-	white-space: nowrap;
-}
-.fmTH5 {
-	cursor: pointer;
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 10px;
-	font-weight: bold;
-	padding-left: 3px;
-	padding-top: 3px;
-	padding-bottom: 1px;
-	padding-right: 1px;
-	border: 1px inset #FFFFFF;
-	color: #FFFFFF;
-	background-color: #A0B0D0;
-	margin-left: 1px;
-	text-align: center;
-	white-space: nowrap;
-}
-
-/*********************************************************************************************************
- table data cells
-*********************************************************************************************************/
-.fmTD1 {
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 10px;
-	font-weight: normal;
-	color: #000000;
-	background-color: #FFFFFF;
-}
-.fmTD2 {
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 10px;
-	font-weight: normal;
-	color: #000000;
-	background-color: #E0F0FF;
-}
-.fmTD3 {
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 10px;
-	font-weight: bold;
-	color: #FFFFFF;
-	background-color: #708BD2;
+	line-height: normal;
 }
 
 /*********************************************************************************************************
  dialog boxes
 *********************************************************************************************************/
+/*** layout ***/
 .fmDialog {
 	position: absolute;
-	z-index: 69;
+	z-index: 10001;
 	visibility: hidden;
 	display: none;
-	border: 1px outset #FFFFFF;
 }
-.fmDialogTitle {
-	padding: 4px;
-	cursor: move;
-	overflow: hidden;
-	white-space: nowrap;
-	text-align: left;
+.fmDialog .fmIconClose {
+	font-size: 1.4em !important;
+	position: relative;
+  top: 2px;
+}
+.fmDialog .fmIconSave {
+	font-size: 1.4em !important;
+	position: relative;
+  top: 2px;
+}
+.fmDialogBody {
+	width: 100%;
+}
+.fmForm {
+	margin: 0;
+}
+.fmForm input[type=file] {
+	margin: 0 0 10px 0;
+	width: 100%;
+}
+textarea.codeedit {
+	/*MP to rabim?*/
+	font-family: "Courier New", Courier, monospace;
+	font-size: 12px;
+	line-height: 19px;
+	padding: 0;
+}
+.fmButton {
+	margin-top: 1em;
+	min-width: 100px;
+	cursor: pointer;
+}
+#fmEditorButton1 {
+	margin: 0;
+}
+#fmEditorChange {
+	color: #c00;
+	padding: 0 10px;
+}
+#fmSaveFromUrl .fmDialogBody {
+	margin-top: 1em;
+}
+#fmPerm div table {
+	width: 100%;
+	text-align: center;
+}
+#fmInfoText2 td {
+	padding: 4px 6px;
 }
 
-/*********************************************************************************************************
- directory tree
-*********************************************************************************************************/
-.fmExplorer, .fmExplorerHilight, .fmExplorerActive, .fmExplorerContent, .fmExplorerFileCnt  {
-	font-family: "Trebuchet MS", Arial, Helvetica;
-	font-size: 11px;
+/*** design ***/
+.fmDialog {
+	background-color: #fff;
+	color: inherit;
+	/*border: 1px outset #ccc;*/
+	border-left: 1px solid #ccc;
+	box-shadow: 3px 3px 4px #808080;
 }
-.fmExplorer, .fmExplorerHilight, .fmExplorerActive, .fmExplorerTitle {
+.fmDialogTitle,
+.fmButton {
+	/* overwritten by ui */
+	color: #FFF;
+	background: #2F4248; /* #1c2836 */
+}
+#fmPerm div table td {
+	border: 1px solid #ccc;
 	padding: 4px;
-	display: block;
-	text-align: left;
-	white-space: nowrap;
-	overflow: hidden;
 }
-.fmExplorerHilight {
-	background-color: #C0D0F0;
-}
-.fmExplorerActive {
-	background-color: #D0E0F0;
-}
-.fmExplorerFileCnt {
-	color: #808080;
-}
-.fmExplorerTitle {
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 10px;
-	font-weight: bold;
-	color: #405BA2;
-	background-color: #F0F8FF;
-	border-bottom: 1px solid #405BA2;
-	text-align: left;
+#fmEditor,
+#fmDocViewer {
+	border-left: none !important;
 }
 
 /*********************************************************************************************************
@@ -285,34 +694,316 @@
 .fmProgressBar {
 	height: 10px;
 	background-color: #708BD2;
-	border: 1px outset white;
+	border: 1px outset #FFF;
 }
 .fmProgressBarBG {
 	height: 12px;
 	background-color: #E0E0E0;
-	border: 1px solid black;
+	border: 1px solid #000;
 	text-align: left;
 }
 .fmProgressBarText {
-	font-family: Arial, Helvetica;
 	font-size: 10px;
 	white-space: nowrap;
 }
 .fmProgressBarCont {
 	background-color: #B0C0D0;
-	border: 1px solid white;
+	border: 1px solid #FFF;
 	margin: 3px;
 }
 
 /*********************************************************************************************************
- shadows
+ MAIN TITLE
 *********************************************************************************************************/
-.fmShadow {
-	-moz-box-shadow: 3px 3px 4px #808080;
-	-webkit-box-shadow: 3px 3px 4px #808080;
-	box-shadow: 3px 3px 4px #808080;
-	/* For IE 8 */
-	-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#808080')";
-	/* For IE 5.5 - 7 */
-	filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#808080');
+/*** layout ***/
+.fmContTitle,
+.fmContTitlePath,
+.fmContTitleActions {
+	height: 25px;
+	line-height: 25px;
+	overflow: hidden;
+}
+.fmContTitle {
+	margin-bottom: 10px;
+}
+.fmContTitlePath {
+	float: left;
+	overflow: hidden;
+	white-space: nowrap;
+	padding: 0 4px;
+}
+.fmContTitleActions {
+	float: right;
+	text-align: right;
+	padding-right: 4px;
+}
+.fmContTitleActions .fmIcon {
+	font-size: 20px !important;
+	margin-left: 10px;
+	cursor: pointer;
+}
+.fmContTitleActions .fa-stack {
+	height: 20px;
+	width: 20px;
+	line-height: 20px;
+	margin-left: 10px;
+	cursor: pointer;
+}
+.fmContTitleActions .fmIconPlus {
+	font-size: 8px !important;
+	top: 4px;
+}
+.fmContTitleActions .fmIconSearch {
+	position: relative;
+	top: -1px;
+}
+.fmContTitleActions .fmIconDir {
+	margin-left: 0;
+	font-size: 24px !important;
+	top: -4px;
+}
+.fmContTitleActions .fmIconFile {
+	margin-left: 0;
+	font-size: 20px !important;
+	top: -3px;
+}
+.fmContTitleActions .fmIconDownload {
+	position: relative;
+	top: 2px;
+}
+.spinner > span {
+  width: 7px;
+  height: 7px;
+  background-color: #888;
+  border-radius: 100%;
+  display: inline-block;
+  margin-right: 2px;
+  -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+.spinner .bounce1 {
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+.spinner .bounce2 {
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+@-webkit-keyframes sk-bouncedelay {
+  0%, 80%, 100% { -webkit-transform: scale(0) }
+  40% { -webkit-transform: scale(1.0) }
+}
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  } 40% {
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+  }
+}
+
+
+/*** design ***/
+.fmContTitle {
+	/*background: red;*/ /* for testing */
+}
+.fmContTitlePath {
+	/*background: pink;*/ /* for testing */
+	/*font-weight: bold;*/ /* for testing */
+}
+.fmContTitleActions {
+	/*background: aqua;*/ /* for testing */
+}
+
+/*********************************************************************************************************
+PW specific
+*********************************************************************************************************/
+
+
+.AdminThemeDefault #fmWrapper {
+	margin-top: 1.2em; /* ok */
+	margin-top: 2em;
+	/* padding is ok, but use margin instead */
+}
+.xAdminThemeDefault img {
+	display: inline;
+}
+.AdminThemeDefault #footer > * {
+	z-index: -1;
+}
+.AdminThemeDefault #ProcessPageSearchForm label {
+	z-index: 0;
+}
+.AdminThemeDefault input[type=checkbox],
+.AdminThemeDefault input[type=radio] {
+	position: relative;
+	top: 2px;
+	padding: 0;
+	margin: 4px 0;
+}
+.AdminThemeDefault table .ui-button:hover {
+	padding: 0.6em 1.1em !important; /* required! */
+}
+
+.xAdminThemeReno img {
+	display: inline;
+}
+.AdminThemeReno #content {
+	padding-bottom: 1.8em;
+}
+.AdminThemeReno #footer {
+	/* works with margins and paddings */
+}
+.AdminThemeReno input[type=checkbox],
+.AdminThemeReno input[type=radio] {
+	position: relative;
+	top: 2px;
+	padding: 0;
+	margin: 4px 0;
+}
+
+.AdminThemeUikit #content,
+.AdminThemeUikit #pw-content-body {
+	position: relative;
+}
+.AdminThemeUikit #pw-footer {
+	margin-bottom: 0 !important;
+}
+.AdminThemeUikit #main {
+	margin-bottom: 20px !important;
+}
+.AdminThemeUikit #fmWrapper .Inputfield {
+	display: table-cell;
+	outline: none;
+	border: none;
+	border-top: 1px solid #ddd;
+}
+.AdminThemeUikit #fmWrapper .InputfieldContent {
+	padding: 0 1em;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+.AdminThemeUikit #fmWrapper .InputfieldHeader {
+	padding: 1em 1em 0 1em;
+	font-weight: normal;
+}
+.AdminThemeUikit #fmWrapper .fmError .InputfieldHeader {
+	padding-top: 0;
+}
+.AdminThemeUikit #fmWrapper #fmInfo .InputfieldContent,
+.AdminThemeUikit #fmWrapper #fmInfo .InputfieldHeader {
+	padding-top: 0;
+	margin-top: 0;
+}
+.AdminThemeUikit .fmButton {
+	margin-top: 1em;
+}
+.AdminThemeUikit .fmForm input[type=file] {
+	padding: 10px 5px;
+	height: unset;
+	line-height: unset;
+}
+.AdminThemeUikit input[type=checkbox],
+.AdminThemeUikit input[type=radio] {
+	position: relative;
+	top: 2px;
+	padding: 0;
+	margin: 4px 0;
+}
+
+.CodeMirror-lines {
+	padding-top: 0 !important;
+}
+
+/*********************************************************************************************************
+PW CUSTOM STYLING
+*********************************************************************************************************/
+/*** design ***/
+.AdminThemeUikit #pw-content-head > h1 {
+	/* fm title instead of pw title */
+	display: none;
+}
+/* title */
+.AdminThemeUikit .fmContTitle,
+.AdminThemeUikit .fmContTitlePath,
+.AdminThemeUikit .fmContTitleActions {
+	height: 40px;
+	line-height: 40px;
+	font-size: 15px;
+	background: #fff;
+	color: #6c8dae;
+	color: #354b60;
+}
+.AdminThemeUikit .fmContTitle {
+	border-top: 1px solid #d9e1ea;
+	border-bottom: 1px solid #d9e1ea;
+	margin-bottom: 20px;
+}
+.AdminThemeUikit .fmLink,
+.AdminThemeUikit .fmLink:active,
+.AdminThemeUikit .fmLink:visited {
+	color: #d21846;
+	text-decoration: none;
+}
+.AdminThemeUikit .fmLink:hover {
+	color: #d21846;
+	text-decoration: underline;
+}
+
+/* title */
+.AdminThemeDefault .fmContTitle,
+.AdminThemeDefault .fmContTitlePath,
+.AdminThemeDefault .fmContTitleActions {
+	height: 40px;
+	line-height: 40px;
+	font-size: 15px;
+	background: #fff;
+	color: #354b60;
+}
+.AdminThemeDefault .fmContTitle {
+	border-top: 1px solid #d9e1ea;
+	border-bottom: 1px solid #d9e1ea;
+	margin-bottom: 20px;
+}
+.AdminThemeDefault .fmLink,
+.AdminThemeDefault .fmLink:active,
+.AdminThemeDefault .fmLink:visited {
+	color: #db1174;
+	text-decoration: none;
+}
+.AdminThemeDefault .fmLink:hover {
+	color: #db1174;
+	text-decoration: underline;
+}
+
+.AdminThemeReno #headline {
+	/* fm title instead of pw title */
+	display: none;
+	height: 0;
+}
+/* title */
+.AdminThemeReno .fmContTitle,
+.AdminThemeReno .fmContTitlePath,
+.AdminThemeReno .fmContTitleActions {
+	height: 40px;
+	line-height: 40px;
+	font-size: 15px;
+	background: #fff;
+	color: #354b60;
+}
+.AdminThemeReno .fmContTitle {
+	border-top: 1px solid #d9e1ea;
+	border-bottom: 1px solid #d9e1ea;
+	margin-bottom: 20px;
+}
+.AdminThemeReno .fmLink,
+.AdminThemeReno .fmLink:active,
+.AdminThemeReno .fmLink:visited {
+	color: #e83561;
+	text-decoration: none;
+}
+.AdminThemeReno .fmLink:hover {
+	color: #e83561;
+	text-decoration: underline;
 }

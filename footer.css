@@ -1,0 +1,5 @@
+.AdminThemeDefault #footer,
+.AdminThemeReno #footer,
+.AdminThemeUikit #pw-footer {
+	display: none !important;
+}

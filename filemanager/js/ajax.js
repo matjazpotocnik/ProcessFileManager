@@ -132,8 +132,11 @@ function ajax() {
 							ind = elem.name.indexOf(omitField);
 
 							if(!omitField || ind == -1 || ind > 0) {
-								val = val.replace(/^\s+/, '');
-								val = val.replace(/\s+$/, '');
+								if(elem.type.toLowerCase() != 'textarea') {
+									//MP prevent purging blank lines in textarea - file edit
+									val = val.replace(/^\s+/, ''); // left trim
+									val = val.replace(/\s+$/, ''); // right trim
+								}
 								if(param) param += '&';
 								param += elem.name + '=' + encodeURIComponent(val);
 							}

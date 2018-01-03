@@ -70,6 +70,8 @@ class FM_File extends FM_FileBase {
 		'gtar'    => 'application/x-gtar',
 		'hdf'     => 'application/x-hdf',
 		'php'     => 'application/x-httpd-php',
+		'module'  => 'application/x-httpd-php',
+		'inc'     => 'application/x-httpd-php',
 		'phtml'   => 'application/x-httpd-php',
 		'latex'   => 'application/x-latex',
 		'mif'     => 'application/x-mif',

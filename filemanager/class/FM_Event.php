@@ -67,6 +67,9 @@ class FM_Event {
 			case 'expOpen':
 				return $this->_openExpDir($id);
 
+			case 'expOpenPath':
+				return $this->_openExpDirPath($id);
+
 			case 'parent':
 				return $this->_parentDir();
 
@@ -81,6 +84,9 @@ class FM_Event {
 
 			case 'newDir':
 				return $this->_newDir($param);
+
+			case 'createFile':
+				return $this->_createFile($param);
 
 			case 'newFile':
 				return $this->_newFile();
@@ -139,6 +145,12 @@ class FM_Event {
 
 			case 'readTextFile':
 				return $this->_readTextFile($id);
+
+			case 'getAcl':
+				return $this->_getAcl($id);
+
+			case 'return':
+				return '';
 
 			case 'getExplorer':
 				return $this->_getExplorer();
@@ -209,6 +221,27 @@ class FM_Event {
 	 */
 	protected function _openExpDir($id) {
 		$Folder = $this->_Listing->Explorer->getFolderById($id);
+		if($Folder) {
+			$this->_Listing->curDir = $Folder->path;
+			$this->_Listing->searchString = '';
+
+			if(!$this->_Listing->view()) {
+				return FM_Tools::getMsg('errOpen', FM_Tools::basename($Folder->path));
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * open explorer directory
+	 *
+	 * @param string $path
+	 * @return string
+	 */
+	protected function _openExpDirPath($path) {
+		if($path == '/') $path = '';
+		$path = $this->_FileManager->rootDir . $path;
+		$Folder = $this->_Listing->Explorer->getFolderByPath($path);
 		if($Folder) {
 			$this->_Listing->curDir = $Folder->path;
 			$this->_Listing->searchString = '';
@@ -349,6 +382,47 @@ class FM_Event {
 				}
 			}
 		}
+		$this->_Listing->refresh($this->_Listing->curDir);
+		return $error;
+	}
+
+	/**
+	 * create new file
+	 *
+	 * @param string $name
+	 * @return string
+	 */
+	protected function _createFile($name) {
+		$error = '';
+		if($this->_FileManager->enableCreateFile) {
+			if($name != '') {
+				/*if(get_magic_quotes_gpc()) $name = stripslashes($name);
+				$name = str_replace('\\', '/', $name);*/
+
+				/*if($this->_FileManager->replSpacesUpload) {
+					$name = str_replace(' ', '_', $name);
+				}
+
+				if($this->_FileManager->lowerCaseUpload) {
+					$name = strtolower($name);
+				}*/
+
+				$file = $this->_Listing->curDir . "/" . $name;
+
+				if(file_exists($file)) {
+					$error = "File exists!";
+				} else {
+					$ret = @file_put_contents($file, '');
+					if($this->_FileManager->defaultFilePermissions) {
+						if(!$this->_Listing->FileSystem->changePerms($file, $this->_FileManager->defaultFilePermissions)) {
+							$error = FM_Tools::getMsg('errPermChange', $dir);
+						}
+					}
+				}
+
+			}
+		}
+
 		$this->_Listing->refresh($this->_Listing->curDir);
 		return $error;
 	}
@@ -500,7 +574,8 @@ class FM_Event {
 				if($Entry = $this->_Listing->getEntry($id)) {
 					$mode = '';
 					for($i = 0; $i < 9; $i++) {
-						$mode .= $perms[$i] ? 1 : 0;
+						//$mode .= $perms[$i] ? 1 : 0;
+						$mode .= array_key_exists($i, $perms) ? 1 : 0; //MP
 					}
 					if(!$Entry->changePerms(bindec($mode))) {
 						$errors[] = FM_Tools::getMsg('errPermChange', $Entry->name);
@@ -529,6 +604,9 @@ class FM_Event {
 						if(!$encoding) $encoding = $this->_FileManager->encoding;
 						$fmText = FM_Tools::utf8Decode($fmText, $encoding);
 					}
+
+					$lineEnding = FM_Tools::detect_newline_type($data);
+					$fmText = FM_Tools::handleLineEndings($fmText, $lineEnding); //MP preserve original line endings
 
 					if(!$Entry->saveFile($fmText)) {
 						$this->_Listing->refresh($this->_Listing->curDir);
@@ -579,6 +657,7 @@ class FM_Event {
 		print 'move:' . (int) $this->_FileManager->enableMove . ',';
 		print 'copy:' . (int) $this->_FileManager->enableCopy . ',';
 		print 'newDir:' . (int) $this->_FileManager->enableNewDir . ',';
+		print 'createFile:' . (int) $this->_FileManager->enableCreateFile . ',';
 		print 'mediaPlayer:' . (int) $this->_FileManager->enableMediaPlayer . ',';
 		print 'docViewer:' . (int) $this->_FileManager->enableDocViewer . ',';
 		print 'imgViewer:' . (int) $this->_FileManager->enableImagePreview . ',';
@@ -630,8 +709,10 @@ class FM_Event {
 		print "publicUrl:'" . addslashes($this->_FileManager->publicUrl) . "',";
 		print "uploadEngine:'" . addslashes($this->_FileManager->uploadEngine) . "',";
 		print 'perlEnabled:' . (int) $this->_FileManager->perlEnabled . ',';
-		print 'hideFileCnt:' . (int) (count($this->_FileManager->allowFileTypes) > 0 || count($this->_FileManager->hideFileTypes) > 0) . ',';
+		print 'hideFileCnt:' . (int) (count($this->_FileManager->allowFileTypes) > 0 || count($this->_FileManager->hideFileTypes) > 0 || $this->_FileManager->hideFileCnt) . ',';
 		print 'quota:' . (float) $this->_FileManager->quota . ',';
+		print "adminTheme:'" . addslashes($this->_FileManager->adminTheme) . "',";
+		print 'isWin:' . (int) $this->_FileManager->isWin . ',';
 		print 'customAction:' . $this->_FileManager->customAction;
 		print '}';
 	}
@@ -681,6 +762,19 @@ class FM_Event {
 		if($enabled && $id != '') {
 			if($Entry = $this->_Listing->getEntry($id)) {
 				$Entry->sendFile($disp);
+			}
+		}
+	}
+
+	/**
+	 * Get acl data, owner and permissions on windows.
+	 *
+	 * @param integer $id		entry ID
+	 */
+	protected function _getAcl($id) {
+		if($id != '') {
+			if($Entry = $this->_Listing->getEntry($id)) {
+				print FM_Tools::getAcl($Entry->path);
 			}
 		}
 	}
@@ -840,6 +934,7 @@ class FM_Event {
 	/**
 	 * create Java uploader
 	 */
+	/*
 	protected function _createJavaUploader() {
 		include_once('ext/jupload/jupload.php');
 
@@ -877,11 +972,12 @@ class FM_Event {
 		print "<!--JUPLOAD_JSCRIPT-->\n";
 		print "<link rel=\"stylesheet\" href=\"css/filemanager.css\" type=\"text/css\">\n";
 		print "</head>\n";
-		print "<body class=\"fmTD3\" style=\"margin:0px; padding:0px\">\n";
+		print "<body class=\"fmxTD3\" style=\"margin:0; padding:0\">\n";
 		print "<div align=\"center\">\n";
 		print "<!--JUPLOAD_APPLET-->\n";
 		print "</div>\n</body>\n</html>\n";
 	}
+	*/
 
 	/**
 	 * check for update

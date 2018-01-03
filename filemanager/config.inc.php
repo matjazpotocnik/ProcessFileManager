@@ -14,28 +14,32 @@ ftpSSL = no          ; use FTPS - requires PHP 4.3.0 or higher with OpenSSL supp
 
 ; HTTP authentication; leave empty if your server doesn't require authentication
 ; NOTE: this is only for FileManager itself, not for FileManager users!
+; MP: do not change!
 authUser = ""     ; user name
 authPassword = "" ; password
 
 [i18n]
 
 ; see FileManager folder languages for available languages
+; MP: overwritten by the module settings
 language = "en"
 
 ; server locale setting, example: en_US - leave empty to use your server's default setting
 locale = ""
 
 ; server character set, example: ISO-8859-1; set to UTF-8 for systems like Ubuntu
-encoding = "ISO-8859-1"
+encoding = "UTF-8"
 
 ; date-time format for listing entries; for format specifiers see http://php.net/manual/en/function.strftime.php
 ; NOTE: %c uses the server's locale setting (see above)
+; MP: overwritten by the module settings
 dateTimeFormat = "%Y-%m-%d %H:%M:%S"
 
 [onStart]
 
 ; FileManager's data directory (file path, example for local mode: /home/users/gerry/htdocs/files)
 ; NOTE: must be an absolute path in local mode and a relative path in FTP mode
+; MP: overwritten by the module settings
 rootDir = ""
 
 ; open this directory by default (file path, example: "files/images"
@@ -53,27 +57,34 @@ startSearch = ""
 ; separate multiple passwords by a comma: "myPwd1,myPwd2,myPwd3"
 ; add data directories like this: "myPwd1::/home/users/peter/htdocs, myPwd2::/home/users/mary/htdocs"
 ; NOTE: password-bound data directories will override variable rootDir!
+; MP: do not change!
 loginPassword = ""
 
 [general]
 
 ; FileManager WEB path (example: [http://domain]/tools/filemanager)
 ; NOTE: only set this if FileManager doesn't view properly!
+; MP: do not change!
 fmWebPath = ""
 
 ; FileManager width; percent (e.g. "100%") or pixels (e.g. 700)
+; MP: do not change!
 fmWidth = "100%"
 
 ; FileManager height; percent (e.g. "100%") or pixels (e.g. 700)
+; MP: do not change!
 fmHeight = "100%"
 
 ; FileManager margin (pixels)
+; MP: do not change!
 fmMargin = 0
 
 ; FileManager default view (details or icons)
+; MP: overwritten by the module settings
 fmView = "details"
 
-; prefix for containers, session and cookie variables
+; prefix for containers, session and cookie variables - do not change
+; MP: do not change!
 fmPrefix = "fm"
 
 ; FileManager caption in title bar - will replace system type
@@ -84,9 +95,11 @@ hideDisabledIcons = no
 
 ; hide title bar
 ; NOTE: icons for refresh, file search, new directory, file upload, etc. will also be hidden!
+; MP: overwritten by the module settings
 hideTitleBar = no
 
 ; hide specific list columns; possible values: size, changed, permissions, owner, group
+; MP: do not change!
 hideColumns = "owner,group"
 
 ; mark new and modified files and folders
@@ -99,6 +112,7 @@ useRightClickMenu = yes
 
 ; path to temporary directory; it is recommended to create a dedicated directory
 ; NOTE: for security reasons, do not use a directory within your webservers document root!
+; MP: overwritten by the module settings
 tmpFilePath = "/tmp"
 
 ; JavaScript function that should be called when a file is clicked; see readme file for details
@@ -110,24 +124,28 @@ debugInfo = no
 [explorer]
 
 ; directory tree width; percent (e.g. "100%") or pixels (e.g. 700); 0 = don't view directory tree
+; MP: overwritten by the module settings
 explorerWidth = "25%"
 
 ; expand all folders in directory tree
-explorerExpandAll = yes
+explorerExpandAll = no
 
 [log]
 
 ; log window height (pixels; 0 = don't view log window)
-logHeight = 100
+; MP: do not change!
+logHeight = 0
 
 ; save log messages
 ; NOTE: if enabled, all log messages will be saved in FileManager's log directory
 logSave = no
 
 ; path to log directory; leave empty to use FileManager's own directory
+; MP: overwritten by the module settings
 logFilePath = ""
 
 ; prefix for log files
+; MP: overwritten by the module settings
 logFilePrefix = ""
 
 [imageViewer]
@@ -140,10 +158,14 @@ enableImagePreview = yes
 enableImageRotation = yes
 
 ; max. width of preview images (pixels)
-thumbMaxWidth = 600
+; MP: do not change!
+thumbMaxWidth = 800
+thumbMaxWidth = 80000
 
 ; max. height of preview images (pixels)
-thumbMaxHeight = 400
+; MP: do not change!
+thumbMaxHeight = 600
+thumbMaxHeight = 60000
 
 ; sharpen preview thumbnails and resized images
 ; NOTE: this may take some time, so turn it off if thumbnail creation is too slow
@@ -161,6 +183,7 @@ mediaPlayerWidth = 420
 mediaPlayerHeight = 300
 
 ; force playback via Flash, i.e. don't use HTML5 even if it's available
+; MP: do not change!
 forceFlash = no
 
 [docViewer]
@@ -169,7 +192,7 @@ forceFlash = no
 enableDocViewer = yes
 
 ; document viewer width (pixels)
-docViewerWidth = 700
+docViewerWidth = 800
 
 ; document viewer height (pixels)
 docViewerHeight = 500
@@ -179,20 +202,23 @@ docViewerUrl = "https://docs.google.com/viewer?embedded=true&url="
 
 ; URL for public file access, example: http://www.yourdomain.com/path/to/files
 ; NOTE: required for Google document viewer (MS Word files, PDF files, etc.)
+; MP: do not change!
 publicUrl = ""
 
 [fileSystem]
 
 ; read ID3 tags from MP3 files
 ; NOTE: if used in FTP mode, it will take some time to copy MP3 files from FTP server
-enableId3Tags = no
+enableId3Tags = yes
 
 ; default permissions for uploaded files (octal number without leading zero, example: 755)
 ; NOTE: does not work correctly on Windows systems
+; MP: overwritten by the module settings
 defaultFilePermissions = ""
 
 ; default permissions for new directories (octal number without leading zero, example: 755)
 ; NOTE: does not work correctly on Windows systems
+; MP: overwritten by the module settings
 defaultDirPermissions = ""
 
 ; allow files with certain extensions, example: "mp3,txt,jpg"; leave empty to allow all types
@@ -208,13 +234,18 @@ hideFileTypes = ""
 hideDirNames = ""
 
 ; hide system files with leading dot, example: .htaccess
-hideSystemFiles = yes
+hideSystemFiles = no
 
 ; hide system type
+; MP: do not change!
 hideSystemType = yes
 
 ; hide file path in file details
-hideFilePath = yes
+hideFilePath = no
+
+; hide file count in explorer
+; MP: this is new
+hideFileCnt = yes
 
 ; hide symbolic link target
 hideLinkTarget = no
@@ -223,7 +254,7 @@ hideLinkTarget = no
 useFileCache = yes
 
 ; view deleted files (only if enableRestore = yes)
-viewDeletedFiles = no
+viewDeletedFiles = yes
 
 ; check for file and directory changes every .. seconds (0 = disable smart refresh)
 ; NOTE: will increase traffic and server load!
@@ -235,7 +266,8 @@ quota = ""
 [upload]
 
 ; which upload engine should be used; possible values: Java, JS, Perl, PHP
-uploadEngine = "Java"
+; MP: do not change!
+uploadEngine = "PHP"
 
 ; keep folder structure when uploading directories with sub folders
 ; NOTE: works only in combination with the Java upload engine!
@@ -294,7 +326,7 @@ enableDownload = yes
 
 ; enable bulk download of files/directories as ZIP archive
 ; NOTE: your PHP installation must support ZLib or this won't work!
-enableBulkDownload = no
+enableBulkDownload = yes
 
 ; enable file editing
 enableEdit = yes
@@ -303,7 +335,7 @@ enableEdit = yes
 enableDelete = yes
 
 ; enable file restoring
-enableRestore = no
+enableRestore = yes
 
 ; enable file / directory renaming
 enableRename = yes
@@ -319,6 +351,9 @@ enableCopy = yes
 
 ; enable directory creation
 enableNewDir = yes
+
+; enable file creation
+enableCreateFile = yes
 
 ; enable file / directory search
 enableSearch = yes

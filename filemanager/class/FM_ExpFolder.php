@@ -71,5 +71,3 @@ class FM_ExpFolder {
 		$this->time = time();
 	}
 }
-
-?>

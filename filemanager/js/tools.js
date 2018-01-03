@@ -32,7 +32,8 @@ var IE = (navigator.userAgent.indexOf('MSIE') != -1 && !OP);
 var FF = (navigator.userAgent.indexOf('Firefox') != -1 && !OP);
 var WK = (navigator.userAgent.indexOf('WebKit') != -1 && !OP);
 var GK = (navigator.userAgent.indexOf('Gecko') != -1 || OP);
-var DM = (document.designMode && document.execCommand && !OP && !WK); /* Opera and WebKit not supported at the moment */
+//var DM = (document.designMode && document.execCommand && !OP && !WK); /* Opera and WebKit not supported at the moment */
+DM = true;
 
 function $$(id) { return document.getElementById(id); }
 
@@ -40,6 +41,33 @@ function $$(id) { return document.getElementById(id); }
 // Little helpers
 //---------------------------------------------------------------------------------------------------------
 var fmTools = {
+
+	getOffset: function(el) {
+		var _x = 0;
+		var _y = 0;
+		var style;
+		while(el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+			style = getComputedStyle(el);
+			_x += el.offsetLeft - el.scrollLeft - parseInt(style.getPropertyValue('padding-left'));
+			_y += el.offsetTop - el.scrollTop - parseInt(style.getPropertyValue('padding-top'));
+			el = el.offsetParent;
+		}
+		return { top: _y, left: _x };
+	},
+
+	outerHeight: function (el) {
+		var height = el.offsetHeight;
+		var style = getComputedStyle(el);
+		height += parseInt(style.marginBottom) + parseInt(style.marginTop);
+		return height;
+	},
+
+	outerWidth: function (el) {
+		var width = el.offsetWidth;
+		var style = getComputedStyle(el);
+		width += parseInt(style.marginLeft) + parseInt(style.marginRight);
+		return width;
+	},
 
 	getWindowWidth: function() {
 		if(window.innerWidth)
