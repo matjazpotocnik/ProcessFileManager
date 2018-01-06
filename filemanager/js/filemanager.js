@@ -573,7 +573,19 @@ var fmLib = {
 			}
 			else {
 				var obj = $$(curCont + 'Exp');
-				if(obj) obj.innerHTML = html;
+				if(obj) {
+					obj.innerHTML = html;
+
+					//MP bring into view
+					if(obj.childNodes.length > 1) {
+						var folders = obj.childNodes[1];
+						var i = folders.getElementsByClassName('fmExplorerActive');
+						if(i.length > 0) {
+							if(typeof i[0].scrollIntoViewIfNeeded === "function") i[0].scrollIntoViewIfNeeded();
+							else i[0].scrollIntoView(false);
+						}
+					}
+				}
 			}
 		}
 		else {
@@ -600,6 +612,7 @@ var fmLib = {
 					setTimeout(function(){document.getElementsByClassName('fmContTable')[0].style.visibility = "visible";}, 10);
 				}
 			});
+
 		}
 	},
 
@@ -1626,60 +1639,3 @@ var fmLib = {
     this.inputFocus = toggle;
   }
 }
-
-//this is moved to ProcessFileManager.js
-/*fmTools.addListener(document, 'mousemove', function(e) {
-	var mouseX = fmLib.mouseX;
-	var mouseY = fmLib.mouseY;
-
-	if(e && e.pageX != null) {
-		fmLib.mouseX = e.pageX;
-		fmLib.mouseY = e.pageY;
-	}
-	else if(event && event.clientX != null) {
-		fmLib.mouseX = event.clientX + fmTools.getScrollLeft();
-		fmLib.mouseY = event.clientY + fmTools.getScrollTop();
-	}
-	if(fmLib.mouseX < 0) fmLib.mouseX = 0;
-	if(fmLib.mouseY < 0) fmLib.mouseY = 0;
-
-	if(fmLib.dragging && fmLib.dialog) {
-		var x = parseInt(fmLib.dialog.style.left + 0);
-		var y = parseInt(fmLib.dialog.style.top + 0);
-		fmLib.dialog.style.left = x + (fmLib.mouseX - mouseX) + 'px';
-		fmLib.dialog.style.top = y + (fmLib.mouseY - mouseY) + 'px';
-	}
-});
-
-fmTools.addListener(document, 'mousedown', function(e) {
-	var firedobj = (e && e.target) ? e.target : event.srcElement;
-	if(firedobj.nodeType == 3) firedobj = firedobj.parentNode;
-
-	if(firedobj.className) {
-		var isTitle = (firedobj.className.indexOf('fmDialogTitle') != -1);
-		var isDialog = (firedobj.className.indexOf('fmDialog') != -1 && !isTitle);
-
-		//MP todo zakaj je to
-		if(firedobj.className.indexOf('fmTH1') != -1 || isTitle) {
-			fmTools.setUnselectable(firedobj, 'move');
-
-			while(firedobj.tagName != 'HTML' && !isDialog) {
-				firedobj = firedobj.parentNode;
-				isTitle = (firedobj.className.indexOf('fmDialogTitle') != -1);
-				isDialog = (firedobj.className.indexOf('fmDialog') != -1 && !isTitle);
-			}
-
-			if(firedobj.className.indexOf('fmDialog') != -1) {
-				fmLib.dialog = firedobj;
-				fmLib.dragging = true;
-				fmLib.setOpacity(50, fmLib.dialog);
-			}
-		}
-	}
-});
-
-fmTools.addListener(document, 'mouseup', function() {
-	fmLib.dragging = false;
-	fmLib.setOpacity(100, fmLib.dialog);
-});
-*/

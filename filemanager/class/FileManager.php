@@ -631,7 +631,7 @@ class FileManager {
 		//if(!$this->hideTitleBar) print "<div id='$this->_titleCont' class='fmContTitle'>File Manager: enumerating files ...</div>\n";
 		if(!$this->hideTitleBar) print "<div id='$this->_titleCont' class='fmContTitle'>File Manager <span class='spinner'><span class='bounce1'></span><span class='bounce2'></span><span class='bounce3'></span></span></div>\n";
 		print "<table class='fmContTable' border='0' cellspacing='0' cellpadding='0' width='100%'><tr>\n";
-		if($this->explorerWidth) print "<td class='fmContTableLeft' width='$expWidth'><div id='$this->_expCont' class='fmContTableExp fmxTD2'></div></td>\n";
+		if($this->explorerWidth) print "<td class='fmContTableLeft' width='$expWidth'><div id='$this->_expCont' class='fmContTableExp'></div></td>\n";
 		print "<td class='fmContTableRight' width='$listWidth'><div id='$this->_listCont' class='fmContTableList' style='overflow:auto'></div></td>\n";
 		print "</tr></table>\n";
 	}

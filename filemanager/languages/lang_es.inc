@@ -66,7 +66,7 @@ errQuota       = Cuota excedida
 
 msgRemoveDir   = ¿Eliminar el Directorio permanentemente?
 msgDeleteFile  = ¿Eliminar el archivo permanentemente?
-msgSaveFile    = ¿Salvar y escribir sobre el archivo existente?
+msgSaveFile    = ¿El archivo no se guarda ¿Continuar?
 msgDelItems    = ¿Borrar permanentemente los items seleccionados?
 
 fmSearchLabel  = Ingrese la cadena de búsqueda:

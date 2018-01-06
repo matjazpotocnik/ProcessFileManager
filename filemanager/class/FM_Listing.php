@@ -419,8 +419,7 @@ class FM_Listing {
 		}
 		if(!$this->isAllowedDir($dir)) return false;
 
-		$list = $this->FileSystem->readDir($dir); //MP to
-		//MP to precita samo trenutni dir
+		$list = $this->FileSystem->readDir($dir);
 
 		if(!is_array($list)) {
 			if($this->curDir != $rootDir) {

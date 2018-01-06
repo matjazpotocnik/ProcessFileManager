@@ -24,8 +24,8 @@ The date/time will be output according to the format specified. See the PHP date
 
 
 ## License
-Copyright (c) 2018 Matja&#382; Poto&#269;nik and Gerd Tentler 
-Github: https://github.com/matjazpotocnik/ProcessFileManager 
-Support: https://processwire.com/talk/topic/TODO/
+Copyright (c) 2018 Matja&#382; Poto&#269;nik and Gerd Tentler  
+Github: https://github.com/matjazpotocnik/ProcessFileManager  
+Support: https://processwire.com/talk/topic/TODO/  
 
-See the "LICENSE" and the "LICENCE File Manager" files for details.
+See the "LICENSE" and the "LICENCE File Manager" files for details on using this module in commercial projects.

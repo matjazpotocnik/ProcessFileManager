@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.2 (2018-01-06)
+- minor fixes
+
 ### 0.0.1 (2018-01-03)
 - support for PW admin themes
 

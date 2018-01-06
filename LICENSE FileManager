@@ -1,8 +1,16 @@
-LICENSE FOR FILEMANAGER
-Author: Gerd Tentler, http://www.gerd-tentler.de/tools/filemanager/
+The license for FileManager components used in ProcessFileManager module
 
-This software is freeware for non-commercial use. If you like it, please feel free to make a donation! You may use this software in commercial project/website for free ONLY if you, the developer/administrator of the website, are the only user of this software. However, if you give the permisson to use this software to other users (clients, editors etc.) in a commercial project/website, please donate at least 20 EUR via PayPal (see http://www.gerd-tentler.de/tools/filemanager/?page=download). Thank you! :-)
+Copyright (c) 2006 - 2018 Gerd Tentler, http://www.gerd-tentler.de/tools/filemanager/
 
-Also please note that although you are allowed to make modifications for your own personal use, you may not distribute the original or the modified code without permission.
+This software is freeware for non-commercial use. If you like it, please feel free to make a
+donation! You may use this software in commercial project/website for free ONLY if you, the
+developer/administrator of the website, are the only user of this software. However, if you give the
+permisson to use this software to other users (clients, editors etc.) in a commercial
+project/website, please donate at least 20 EUR via PayPal (see 
+http://www.gerd-tentler.de/tools/filemanager/?page=download). Thank you! :-)
 
-If you change the code, there should be no modification of the copyright message. You should, however, add a message below the copyright message and list your modifications there.
+Also please note that although you are allowed to make modifications for your own personal use, you
+may not distribute the original or the modified code without permission.
+
+If you change the code, there should be no modification of the copyright message. You should,
+however, add a message below the copyright message and list your modifications there.

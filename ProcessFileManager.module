@@ -34,7 +34,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		return array(
 			'title'   => 'File Manager',
 			'summary' => _('File manager'),
-			'version' => '0.0.1',
+			'version' => '0.0.2',
 			'author'  => 'Matja&#382; Poto&#269;nik, Gerd Tentler',
 			'icon'    => 'folder-o',
 			'href'    => 'https://github.com/matjazpotocnik/ProcessFileManager/',
@@ -280,7 +280,6 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 	public function ___install() {
 		parent::___install();
 		if(!extension_loaded('mbstring') || !function_exists('iconv')) $this->message("Support for mbstring and iconv is recommended.");
-		//if(!function_exists("scandir")) $this->error('scandir function does not exist.');
 	}
 
 }
