@@ -10,7 +10,7 @@ include_once(/*NoCompile*/__DIR__ . '/filemanager/class/FileManager.php');
  * file attributes, properties and file permissions. Folders and files may be displayed in a
  * hierarchical tree based on their directory structure.
  *
- * @version 0.0.1
+ * @version 0.0.3
  * @author Matjaz Potocnik
  * @author Gerd Tentler
  * @link https://github.com/matjazpotocnik/ProcessFileManager
@@ -34,7 +34,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		return array(
 			'title'   => 'File Manager',
 			'summary' => _('File manager'),
-			'version' => '0.0.2',
+			'version' => '0.0.3',
 			'author'  => 'Matja&#382; Poto&#269;nik, Gerd Tentler',
 			'icon'    => 'folder-o',
 			'href'    => 'https://github.com/matjazpotocnik/ProcessFileManager/',
@@ -173,6 +173,8 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$config->styles->add ("{$codemirror}addon/dialog/dialog.css");
 		$config->styles->add ("{$codemirror}addon/fold/foldgutter.css");
 		//if($this->theme != "default") $config->styles->add ("{$codemirror}theme/{$this->theme}.css");
+		
+		$config->scripts->add($config->urls->siteModules . __CLASS__ . '/monaco-editor/min/vs/loader.js');
 
 		$out = "<div id='fmWrapper' style='width:100%; height:100%;'>"; // do not remove this line, leave the styles !!!
 		$out .= $FM->create();
@@ -201,6 +203,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 			'language' => 'en',
 			'dateTimeFormat' => '%Y-%m-%d %H:%M:%S',
 			'hideFooter' => '0',
+			'fmEditor' => 'monaco',
 		);
 
 		$f = $modules->get('InputfieldSelect');
@@ -269,12 +272,22 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$f->required = true;
 		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
 		$fields->add($f);
+		
+		$f = $modules->get('InputfieldSelect');
+		$f->name = 'fmEditor';
+		$f->label = $this->_('Default editor:');
+		$f->columnWidth = 33;
+		$f->required = true;
+		$f->addOption('monaco', $this->_('Monaco editor'));
+		$f->addOption('codemirror', $this->_('CodeMirror'));
+		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$fields->add($f);
 
 		return $fields;
 	}
 
 	/**
-	 * Check for mbstring, iconv, exec and scandir support.
+	 * Check for mbstring and iconv support.
 	 *
 	 */
 	public function ___install() {

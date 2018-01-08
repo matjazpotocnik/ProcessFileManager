@@ -624,7 +624,7 @@ var fmParser = {
 		html += '<textarea name="fmText" ';
 		//MP don't forget newline before json.text.content in textarea!!!
 		html += 'class="codeedit ' + json.text.lang + ' lineNumbers focus" wrap="off">\n' + json.text.content + '</textarea>\n';
-		html += '</form>\n';
+		html += '<div id="fmEditorMonaco"></div></form>\n';
 
 		contObj.innerHTML = html;
 		return true;

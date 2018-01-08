@@ -1,6 +1,8 @@
 # ProcessFileManager
 
-A module for managing files and folders. It supports creating, opening (e.g. viewing, playing, editing), renaming, moving, copying, deleting and searching for files.
+A module for managing files and folders. Supports creating, opening (e.g. viewing, editing, paying),
+renaming, moving, copying, deleting and searching for files. Intended primarily for superusers, 
+give other users file-manager permission.
 
 ## Options
 
@@ -22,10 +24,12 @@ Select the language for the file manager window. Translators are welcome.
 ### The date/time format
 The date/time will be output according to the format specified. See the PHP date function reference for more information on how to customize this format.
 
+### The default languge
+Either 'monaco' or 'codemirror'.
 
 ## License
 Copyright (c) 2018 Matja&#382; Poto&#269;nik and Gerd Tentler  
 Github: https://github.com/matjazpotocnik/ProcessFileManager  
-Support: https://processwire.com/talk/topic/TODO/  
+Support: https://processwire.com/talk/topic/18176-processfilemanager/  
 
 See the "LICENSE" and the "LICENCE File Manager" files for details on using this module in commercial projects.

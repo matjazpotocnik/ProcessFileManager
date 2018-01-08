@@ -713,6 +713,7 @@ class FM_Event {
 		print 'quota:' . (float) $this->_FileManager->quota . ',';
 		print "adminTheme:'" . addslashes($this->_FileManager->adminTheme) . "',";
 		print 'isWin:' . (int) $this->_FileManager->isWin . ',';
+		print "fmEditor:'" . addslashes($this->_FileManager->fmEditor) . "',";
 		print 'customAction:' . $this->_FileManager->customAction;
 		print '}';
 	}

@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.3 (2018-01-08)
+- initial support for monaco editor
+
 ### 0.0.2 (2018-01-06)
 - minor fixes
 

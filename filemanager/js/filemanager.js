@@ -35,6 +35,7 @@ var fmLib = {
 			else if(frmName) {
 				var fmEditorChange = $$('fmEditorChange');
 				if(fmEditorChange) fmEditorChange.innerHTML = '';
+				if(window.mEditor) document.forms[frmName][2] = window.editor.getValue(); //only for monaco
 				document.forms[frmName].submit();
 			}
 		}
@@ -81,7 +82,8 @@ var fmLib = {
 
 				if(contObj) {
 					fmParser.parseEditor(ajaxObj.response, contObj);
-					fmLib.initEditor(contObj);
+					if(fmContSettings[curCont].fmEditor == 'codemirror') fmLib.initEditor(contObj);
+					else fmLib.initEditor1(contObj);
 				}
 			});
 		}
@@ -334,6 +336,66 @@ var fmLib = {
 
 	},
 
+	initEditor1: function(contObj) {
+		var elem = contObj.getElementsByTagName('textarea')[0];
+		if(!elem) alert('editor textarea not defined');
+		elem.style.display = 'none'; //hide textarea
+
+		//MP first classname is codeeditor, the second one is file extension
+		var fmEditorMonaco = $$('fmEditorMonaco');
+
+		// set the dimensions of the editor to the dimensions of the container
+		fmEditorMonaco.style.display = 'block';
+		fmEditorMonaco.style.width = contObj.clientWidth + 'px';
+		fmEditorMonaco.style.height = contObj.clientHeight + 'px';
+
+		var mLanguage = elem.classList[1];
+		if(mLanguage == 'module') mLanguage = 'php';
+
+		var lang = fmContSettings[this.curCont1].language;
+		window.mLang = fmMsg[lang].msgSaveFile;
+
+		require.config({ paths: { 'vs': fmWebPath + '/../monaco-editor/min/vs' }});
+		require(['vs/editor/editor.main'], function() {
+			window.mEditor = monaco.editor.create(fmEditorMonaco, {
+				value: elem.value,
+				language: mLanguage,
+				fontSize: 13,
+				scrollbar: {
+					//verticalScrollbarSize: 14,
+					//horizontalScrollbarSize: 14,
+					//arrowSize: 30
+				}
+			});
+
+			var mChange = window.mEditor.onDidType(function() {
+				document.getElementById('fmEditorChange').innerHTML = '<i class="fmIconSaveIndicator"></i>';
+			});
+
+			var mCtrls = window.mEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, function() {
+				fmLib.callSave(window.mLang, '', 'frmEdit');
+			});
+
+			var mEscape = window.mEditor.addCommand(monaco.KeyCode.KEY_Escape, function() {
+				fmLib.closeEdit(fmLib.opacity, fmLib.dialog);
+			});
+
+		});
+
+		// make the table td with the save button visible again, it was hidden to prevent jumping
+		$$('fmEditorSaveButton').style.visibility = 'visible';
+
+		// remove the styles left from previos opened editor
+		var fmEditorButton1 = $$('fmEditorButton1'); // the bottom save button
+		if(fmEditorButton1) {
+			fmEditorButton1.classList.remove('ui-state-active');
+			fmEditorButton1.classList.remove('ui-state-hover');
+			fmEditorButton1.classList.add('ui-state-default');
+		}
+
+	},
+
+
 	initTextViewer: function(contObj) {
 		var elem = contObj.getElementsByTagName('textarea')[0];
 		if(!elem) alert('textarea not defined');
@@ -385,13 +447,6 @@ var fmLib = {
 						return fmLib.browserContextMenu;
 					}
 				}
-					//MP what is this?
-					//document.oncontextmenu = function(e) {
-					//	if(!e) e = window.event;
-					//	e.cancelBubble = true;
-					//	if(e.stopPropagation) e.stopPropagation();
-					//	return fmLib.browserContextMenu;
-					//}
 
 				if(fmContSettings[curCont].smartRefresh > 0) {
 					if(fmLib.refreshIv[curCont]) clearInterval(fmLib.refreshIv[curCont]);
@@ -576,11 +631,20 @@ var fmLib = {
 				if(obj) {
 					obj.innerHTML = html;
 
-					//MP bring into view
+					//MP bring into view and open tree
 					if(obj.childNodes.length > 1) {
 						var folders = obj.childNodes[1];
 						var i = folders.getElementsByClassName('fmExplorerActive');
 						if(i.length > 0) {
+							// find all previous fmIconTreeOpen classes and open them
+							var j = i[0].parentElement.previousSibling;
+							while(j) {
+								k = j.getElementsByClassName('fmIconTreeOpen')[0];
+								if(k) this.toggleTreeItem(k, true);
+								j = j.parentElement.previousSibling;
+							}
+
+							//MP bring to view
 							if(typeof i[0].scrollIntoViewIfNeeded === "function") i[0].scrollIntoViewIfNeeded();
 							else i[0].scrollIntoView(false);
 						}
@@ -616,14 +680,14 @@ var fmLib = {
 		}
 	},
 
-	toggleTreeItem: function(i) {
+	toggleTreeItem: function(i, open) {
 		var div, arr;
 
 		if(i) {
 			if(div = i.parentNode.nextSibling) {
 				arr = div.id.split('|');
 
-				if(div.style.display == 'none') {
+				if(div.style.display == 'none' || open) {
 					div.style.display = 'block';
 					fmContSettings[arr[0]].expanded[arr[1]] = true;
 					i.classList.remove('fmIconTreeOpen');

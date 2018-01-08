@@ -121,6 +121,9 @@ customAction = "{caption: '', action: ''}"
 ; only for development: view debug info messages
 debugInfo = no
 
+; editor type, "monaco" or "codemirror"
+fmEditor = "monaco"
+
 [explorer]
 
 ; directory tree width; percent (e.g. "100%") or pixels (e.g. 700); 0 = don't view directory tree

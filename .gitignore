@@ -15,6 +15,7 @@ filemanager/ext/flvplayer/
 filemanager/ext/jupload/
 filemanager/ext/niftyplayer/
 filemanager/ext/filedrop/
+monaco-editor/dev
 
 # Folder config file
 Desktop.ini

@@ -148,6 +148,7 @@ class FileManager {
 	public $adminTheme;
 	public $isWin;
 	public $hideFileCnt;
+	public $fmEditor;
 
 	/**
 	 * HTML container name

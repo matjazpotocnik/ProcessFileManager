@@ -32,8 +32,8 @@ var IE = (navigator.userAgent.indexOf('MSIE') != -1 && !OP);
 var FF = (navigator.userAgent.indexOf('Firefox') != -1 && !OP);
 var WK = (navigator.userAgent.indexOf('WebKit') != -1 && !OP);
 var GK = (navigator.userAgent.indexOf('Gecko') != -1 || OP);
-//var DM = (document.designMode && document.execCommand && !OP && !WK); /* Opera and WebKit not supported at the moment */
-DM = true;
+var DM = (document.designMode && document.execCommand && !OP && !WK); /* Opera and WebKit not supported at the moment */
+//DM = true;
 
 function $$(id) { return document.getElementById(id); }
 
