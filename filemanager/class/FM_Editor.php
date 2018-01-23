@@ -95,7 +95,7 @@ class FM_Editor {
 				$language = 'javascript';
 				break;
 
-			case preg_match('/\.(php3?|phtml?|module?|inc?)$/i', $Entry->name):
+			case preg_match('/\.(php3?|phtml?|module|inc)$/i', $Entry->name):
 				$language = 'php';
 				break;
 

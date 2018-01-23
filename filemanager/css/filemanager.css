@@ -429,6 +429,7 @@
 .fmIconRename:before {
 	/* fa-pencil or fa-pencil-square-o ? */
 	content: "\f101"; /* fa-angle-double-right */
+	content: "\f246"; /* fa-i-cursor */
 }
 .fmIconInfo:before {
 	content: "\f05a"; /* fa-info-circle */
@@ -438,6 +439,7 @@
 	content: "\f00d"; /* fa-times */
 }
 .fmIconPermissions:before {
+	content: "\f084"; /* fa-key */
 	content: "\f023"; /* fa-lock */
 }
 .fmIconEdit:before {

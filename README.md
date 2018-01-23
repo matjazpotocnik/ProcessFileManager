@@ -1,6 +1,6 @@
 # ProcessFileManager
 
-A module for managing files and folders. Supports creating, opening (e.g. viewing, editing, paying),
+A module for managing files and folders. Supports creating, opening (e.g. viewing, editing, playing),
 renaming, moving, copying, deleting and searching for files. Intended primarily for superusers, 
 give other users file-manager permission.
 

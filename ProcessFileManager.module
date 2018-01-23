@@ -126,7 +126,8 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 
 		$FM->tmpFilePath = $tmpFilePath;
 		$FM->logFilePath = $config->paths->logs;
-		$FM->adminTheme = $this->wire('user')->admin_theme;
+		$adminTheme = $this->wire('user')->admin_theme ? $this->wire('user')->admin_theme : $this->wire('config')->defaultAdminTheme;
+		$FM->adminTheme = $adminTheme;
 		$FM->defaultFilePermissions = $config->chmodFile;
 		$FM->defaultDirPermissions = $config->chmodDir;
 
@@ -173,8 +174,10 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$config->styles->add ("{$codemirror}addon/dialog/dialog.css");
 		$config->styles->add ("{$codemirror}addon/fold/foldgutter.css");
 		//if($this->theme != "default") $config->styles->add ("{$codemirror}theme/{$this->theme}.css");
-		
-		$config->scripts->add($config->urls->siteModules . __CLASS__ . '/monaco-editor/min/vs/loader.js');
+
+		if($this->configData['fmEditor'] == 'monaco') {
+			$config->scripts->add($config->urls->siteModules . __CLASS__ . '/monaco-editor/min/vs/loader.js');
+		}
 
 		$out = "<div id='fmWrapper' style='width:100%; height:100%;'>"; // do not remove this line, leave the styles !!!
 		$out .= $FM->create();
@@ -272,7 +275,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$f->required = true;
 		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
 		$fields->add($f);
-		
+
 		$f = $modules->get('InputfieldSelect');
 		$f->name = 'fmEditor';
 		$f->label = $this->_('Default editor:');
