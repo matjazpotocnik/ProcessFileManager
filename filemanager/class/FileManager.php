@@ -172,6 +172,13 @@ class FileManager {
 	public $binaryModes = array('getFile', 'getFiles', 'loadFile', 'getThumbnail', 'getCachedImage');
 
 	/**
+	 * HTML modes
+	 *
+	 * @var array
+	 */
+	public $htmlModes = array('jupload');
+
+	/**
 	 * true if Perl is enabled
 	 *
 	 * @var boolean

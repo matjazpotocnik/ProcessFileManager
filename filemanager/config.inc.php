@@ -122,6 +122,7 @@ customAction = "{caption: '', action: ''}"
 debugInfo = no
 
 ; editor type, "monaco" or "codemirror"
+; MP: this is new
 fmEditor = "monaco"
 
 [explorer]

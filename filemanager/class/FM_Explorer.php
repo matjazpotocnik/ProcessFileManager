@@ -281,8 +281,10 @@ class FM_Explorer {
 	public function _checkCacheUpdate() {
 		if(@filemtime($this->_cacheFile) > $this->_lastCacheUpdate) {
 			$folders = $this->_readCache();
-			if(is_array($folders) && is_array($this->_folders)) {
-				if(count($folders) != count($this->_folders)) {
+			if(is_array($folders)) {
+				if(!is_array($this->_folders) || count($folders) != count($this->_folders)) {
+			//if(is_array($folders) && is_array($this->_folders)) {
+				//if(count($folders) != count($this->_folders)) {
 					$this->_folders = $folders;
 					$this->_lastCacheUpdate = time();
 					return true;

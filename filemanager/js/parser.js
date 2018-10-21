@@ -386,7 +386,7 @@ var fmParser = {
 		if(typeof json != 'object') return '';
 		if(!json.entries) return '';
 
-		var html, i, action, cssRow, cssData, cssIcon, thumbWidth, thumbHeight, perc, name, img, cellsPerRow, cellWidth, isImage;
+		var html, i, action, cssRow, cssData, cssIcon, thumbWidth, thumbHeight, perc, name, img, cellsPerRow, cellWidth, isImage, isDeleted;
 		var url = '?action&fmContainer=' + json.cont;
 		var entries = json.entries;
 		var cellCnt = 0;
@@ -412,8 +412,9 @@ var fmParser = {
 		for(i in entries.items) {
 			fmEntries[json.cont][entries.items[i].id] = entries.items[i];
 			action = this._checkAction(entries.items[i], json);
-
-			if(entries.items[i].deleted) {
+			isDeleted = entries.items[i].deleted;
+			
+			if(isDeleted) {
 				cssData = 'class="fmContentDeleted"';
 			}
 			else if(fmContSettings[json.cont].markNew && entries.items[i].changedTimeStamp > timestamp - 24 * 3600) {
@@ -440,7 +441,7 @@ var fmParser = {
 				img = url + '&fmMode=getCachedImage&fmObject=' + name + '&width=' + thumbWidth + '&height=' + thumbHeight;
 				html += '<div style="height:' + thumbHeight + 'px; background:url(' + img + ') center no-repeat"></div>';
 			}
-			else if(isImage) {
+			else if(isImage && !isDeleted) {
 				thumbWidth = entries.items[i].width;
 				thumbHeight = entries.items[i].height;
 
