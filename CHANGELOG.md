@@ -1,5 +1,8 @@
 # Changelog
 
+### 0.0.4 (2021-03-27)
+- bug fix
+
 ### 0.0.3 (2018-01-08)
 - initial support for monaco editor
 

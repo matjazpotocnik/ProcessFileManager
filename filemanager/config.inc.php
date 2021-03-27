@@ -213,7 +213,8 @@ publicUrl = ""
 
 ; read ID3 tags from MP3 files
 ; NOTE: if used in FTP mode, it will take some time to copy MP3 files from FTP server
-enableId3Tags = yes
+; MP: changed to no as there are some issues
+enableId3Tags = no
 
 ; default permissions for uploaded files (octal number without leading zero, example: 755)
 ; NOTE: does not work correctly on Windows systems

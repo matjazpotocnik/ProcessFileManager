@@ -28,7 +28,7 @@ The date/time will be output according to the format specified. See the PHP date
 Either 'monaco' or 'codemirror'.
 
 ## License
-Copyright (c) 2018 Matja&#382; Poto&#269;nik and Gerd Tentler  
+Copyright (c) 2018-2021 Matja&#382; Poto&#269;nik and Gerd Tentler  
 Github: https://github.com/matjazpotocnik/ProcessFileManager  
 Support: https://processwire.com/talk/topic/18176-processfilemanager/  
 

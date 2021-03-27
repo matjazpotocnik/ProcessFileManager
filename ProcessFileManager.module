@@ -10,7 +10,7 @@ include_once(/*NoCompile*/__DIR__ . '/filemanager/class/FileManager.php');
  * file attributes, properties and file permissions. Folders and files may be displayed in a
  * hierarchical tree based on their directory structure.
  *
- * @version 0.0.3
+ * @version 0.0.4
  * @author Matjaz Potocnik
  * @author Gerd Tentler
  * @link https://github.com/matjazpotocnik/ProcessFileManager
@@ -34,7 +34,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		return array(
 			'title'   => 'File Manager',
 			'summary' => _('File manager'),
-			'version' => '0.0.3',
+			'version' => '0.0.4',
 			'author'  => 'Matja&#382; Poto&#269;nik, Gerd Tentler',
 			'icon'    => 'folder-o',
 			'href'    => 'https://github.com/matjazpotocnik/ProcessFileManager/',
@@ -55,11 +55,22 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 	 * @var array
 	 */
 	protected $configData = array();
+	
+	protected $defaults = array(
+			'fmView' => 'details',
+			'explorerWidth' => '25%',
+			'hideTitleBar' => '0',
+			'hideTitleBar' => '0',
+			'language' => 'en',
+			'dateTimeFormat' => '%Y-%m-%d %H:%M:%S',
+			'hideFooter' => '0',
+			'fmEditor' => 'monaco',
+		);
 
 	public function init() {
 		parent::init();
 
-		$this->configData = $this->wire('modules')->getModuleConfigData($this);
+		$this->configData = array_merge($this->defaults, $this->wire('modules')->getModuleConfigData($this));
 	}
 
 	/**
@@ -199,16 +210,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$fields = new InputfieldWrapper();
 		$modules = $this->wire('modules');
 
-		$defaults = array(
-			'fmView' => 'details',
-			'explorerWidth' => '25%',
-			'hideTitleBar' => '0',
-			'hideTitleBar' => '0',
-			'language' => 'en',
-			'dateTimeFormat' => '%Y-%m-%d %H:%M:%S',
-			'hideFooter' => '0',
-			'fmEditor' => 'monaco',
-		);
+		$defaults = $this->defaults;
 
 		$f = $modules->get('InputfieldSelect');
 		$f->name = 'explorerWidth';
