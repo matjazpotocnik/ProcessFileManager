@@ -285,7 +285,7 @@
 	/*color: coral;*/ /* for testing */
 }
 .fmExplorerTitle {
-	/* the ciolor for the explorer window title, don't change border width */
+	/* the color for the explorer window title, don't change border width */
 	border-bottom-color: #aaa;
 	color: #fff;
 	background-color: #999;
@@ -497,6 +497,9 @@
 .fmIconSpinner:before,
 .fmIconMediaLoading:before {
 	content: "\f110"; /* fa-spinner	*/
+}
+.fmIconHome {
+	font-size: 15px;
 }
 .fmIconHome:before {
 	content: "\f015"; /* fa-home */
@@ -807,16 +810,18 @@ textarea.codeedit {
 
 
 /*** design ***/
+/* for testing
 .fmContTitle {
-	/*background: red;*/ /* for testing */
+	background: red;
 }
 .fmContTitlePath {
-	/*background: pink;*/ /* for testing */
-	/*font-weight: bold;*/ /* for testing */
+	background: pink;
+	font-weight: bold;
 }
 .fmContTitleActions {
-	/*background: aqua;*/ /* for testing */
+	background: aqua;
 }
+*/
 
 /*********************************************************************************************************
 PW specific
@@ -828,9 +833,9 @@ PW specific
 	margin-top: 2em;
 	/* padding is ok, but use margin instead */
 }
-.xAdminThemeDefault img {
+/*.AdminThemeDefault img {
 	display: inline;
-}
+}*/
 .AdminThemeDefault #footer > * {
 	z-index: -1;
 }
@@ -848,9 +853,9 @@ PW specific
 	padding: 0.6em 1.1em !important; /* required! */
 }
 
-.xAdminThemeReno img {
+/*.AdminThemeReno img {
 	display: inline;
-}
+}*/
 .AdminThemeReno #content {
 	padding-bottom: 1.8em;
 }
@@ -913,6 +918,44 @@ PW specific
 	padding: 0;
 	margin: 4px 0;
 }
+
+.AdminThemeUikit input[type=checkbox],
+.AdminThemeUikit input[type=radio] {
+	position: relative;
+	top: 2px;
+	padding: 0;
+	margin: 4px 0;
+}
+
+/*
+All Uikit admin themes: .AdminThemeUikit
+Original admin theme: 	.AdminThemeUikitOriginal
+Konkat theme: 					.AdminThemeUikitDefault
+*/
+body.AdminThemeUikitDefault {
+	display:block !important;
+	min-height:initial !important;
+	/*font-family: system-ui, sans-serif !important;*/
+}
+
+.AdminThemeUikitDefault input[type=checkbox],
+.AdminThemeUikitDefault input[type=radio] {
+	position: relative !important;
+	top: 2px !important;
+	padding: 0 !important;
+	margin: 4px 0 !important;
+	appearance: auto !important;
+	width: auto !important;
+	height: auto !important;
+	vertical-align: initial !important;
+}
+.AdminThemeUikitDefault .fmExplorerActive, .AdminThemeUikitDefault .fmContBodyTable tr:hover, .AdminThemeUikitDefault .fmContBodyTableIconsTd:hover {
+	background-color: #7b8a9b !important;
+}
+.AdminThemeUikitDefault .fmLink, .AdminThemeUikitDefault .fmLink:active, .AdminThemeUikitDefault .fmLink:visited {
+  color: unset !important;
+}
+
 
 .CodeMirror-lines {
 	padding-top: 0 !important;

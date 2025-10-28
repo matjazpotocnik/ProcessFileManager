@@ -2,7 +2,7 @@
 /*jslint browser:true*/
 /*jslint white:true*/
 /*global
- $, window, parent, fmLib, fmTools, fmUrl, fmMode
+ $, window, fmLib, fmTools, fmUrl, fmMode
  */
 $(document).ready(function () {
 	"use strict";

@@ -123,7 +123,7 @@ debugInfo = no
 
 ; editor type, "monaco" or "codemirror"
 ; MP: this is new
-fmEditor = "monaco"
+fmEditor = "codemirror"
 
 [explorer]
 

@@ -152,6 +152,7 @@ class FM_File extends FM_FileBase {
 		'xpm'     => 'image/x-xpixmap',
 		'csv'     => 'text/comma-separated-values',
 		'css'     => 'text/css',
+		'less'    => 'text/css',
 		'htm'     => 'text/html',
 		'html'    => 'text/html',
 		'shtml'   => 'text/html',

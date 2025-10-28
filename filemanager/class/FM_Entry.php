@@ -170,8 +170,8 @@ class FM_Entry {
 	 */
 	protected $_extensions = array(
 		//MP added code extensions
-		'code'    => '[sp]?html?|php\d*|css|module|inc|json|xml|cpp|h',
-		'text'    => 'txt|[sp]?html?|css|jse?|php\d*|pr?l|pm|inc|csv|py|asp|ini|sql|cfg|bat|sh|json|xml|xslt?|xsd|xul|rdf|dtd|wsdl|log|module|md|config|lock|htaccess|git|gitignore|cpp|h',
+		'code'    => '[sp]?html?|php\d*|css|less|module|inc|json|xml|cpp|h',
+		'text'    => 'txt|[sp]?html?|css|less|jse?|php\d*|pr?l|pm|inc|csv|py|asp|ini|sql|cfg|bat|sh|json|xml|xslt?|xsd|xul|rdf|dtd|wsdl|log|module|md|config|lock|htaccess|git|gitignore|cpp|h',
 		'image'   => 'gif|jpe?g|png|w?bmp|tiff?|pict?|ico|svg',
 		'archive' => 'zip|[rtj]ar|t?gz|t?bz2?|arj|ace|lzh|lha|xxe|uue?|iso|dmg|cab|r\d+',
 		'program' => 'exe|com|pif|scr|app|jar|dll|cgi|msi|pl|deb|apk|',

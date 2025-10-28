@@ -363,7 +363,10 @@ abstract class FM_Tools {
 				else if(function_exists('mb_convert_encoding')) {
 					return mb_convert_encoding($str, 'UTF-8', $encoding);
 				}
-				return utf8_encode($str);
+				//else if (function_exists('utf8_encode')) {
+				//	return utf8_encode($str);
+				//}
+				else return $str;
 			}
 		}
 		return $str;
@@ -385,7 +388,10 @@ abstract class FM_Tools {
 				else if(function_exists('mb_convert_encoding')) {
 					return mb_convert_encoding($str, $encoding, 'UTF-8');
 				}
-				return utf8_decode($str);
+				//else if(function_exists('utf8_decode')) {
+				//	return utf8_decode($str);
+				//}
+				else return $str;
 			}
 		}
 		return $str;
@@ -428,6 +434,7 @@ abstract class FM_Tools {
 	 * @return integer				number of characters
 	 */
 	public static function strlen($str) {
+		$str = (string) $str;
 		if(self::isUtf8($str)) {
 			if(function_exists('mb_strlen')) {
 				return mb_strlen($str, 'UTF-8');
@@ -444,6 +451,7 @@ abstract class FM_Tools {
 	 * @return string				lowercase string
 	 */
 	public static function strtolower($str) {
+		$str = (string) $str;
 		if(self::isUtf8($str)) {
 			if(function_exists('mb_strtolower')) {
 				return mb_strtolower($str, 'UTF-8');
@@ -461,6 +469,7 @@ abstract class FM_Tools {
 	 * @return string						the substring
 	 */
 	public static function substr($str, $start, $length = null) {
+		$str = (string) $str;
 		if(self::isUtf8($str)) {
 			if(function_exists('mb_substr')) {
 				return mb_substr($str, $start, $length, 'UTF-8');

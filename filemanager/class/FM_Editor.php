@@ -107,6 +107,10 @@ class FM_Editor {
 				$language = 'css';
 				break;
 
+			case preg_match('/\.less$/i', $Entry->name):
+				$language = 'css';
+				break;
+
 			case preg_match('/\.(pm|pr?l|cgi)$/i', $Entry->name):
 				$language = 'perl';
 				break;

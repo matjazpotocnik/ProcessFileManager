@@ -12,6 +12,7 @@ var fmParser = {
 	mediaCnt: 0,
 
 	makeBreadcrumbs: function(path, url) {
+		if(typeof path == 'undefined') path = '';
 		var crumbsep = " / ";
 		var displayname, allbread, path_ar, p;
 

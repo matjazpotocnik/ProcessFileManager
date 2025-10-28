@@ -458,7 +458,7 @@ class FM_Listing {
 	protected function _viewHeader() {
 		$path = $this->FileSystem->checkPath($this->curDir);
 		$path = ($path == '') ? '/' : FM_Tools::utf8Encode($path, $this->FileManager->encoding);
-		$searchString = FM_Tools::utf8Encode($this->searchString, $this->FileManager->encoding);
+		$searchString = (string) FM_Tools::utf8Encode($this->searchString, $this->FileManager->encoding);
 
 		$json = "cont:'{$this->FileManager->container}',";
 		$json .= 'reloadExplorer:' . (int) $this->_reloadExplorer . ',';

@@ -274,7 +274,7 @@ class FM_Event {
 		if($this->_FileManager->enableRename && $name != '' && $id != '') {
 			if($Entry = $this->_Listing->getEntry($id)) {
 				$path = FM_Tools::dirname($Entry->path);
-				if(get_magic_quotes_gpc()) $name = stripslashes($name);
+				/*if(get_magic_quotes_gpc())*/ $name = stripslashes($name);
 				$name = FM_Tools::basename($name);
 
 				if($this->_FileManager->replSpacesUpload) {
@@ -349,7 +349,7 @@ class FM_Event {
 		$error = '';
 		if($this->_FileManager->enableNewDir) {
 			if($name != '') {
-				if(get_magic_quotes_gpc()) $name = stripslashes($name);
+				/*if(get_magic_quotes_gpc())*/ $name = stripslashes($name);
 				$name = str_replace('\\', '/', $name);
 
 				if($this->_FileManager->replSpacesUpload) {

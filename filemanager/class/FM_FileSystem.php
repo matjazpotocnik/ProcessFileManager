@@ -475,7 +475,7 @@ class FM_FileSystem {
 	 */
 	public function writeFile($path, &$data) {
 		if($data == '') return false;
-		if(get_magic_quotes_gpc()) $data = stripslashes($data);
+		/*if(get_magic_quotes_gpc())*/ $data = stripslashes($data);
 		$ok = false;
 
 		if($this->_checkFtp()) {
