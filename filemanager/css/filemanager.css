@@ -929,15 +929,16 @@ PW specific
 
 /*
 All Uikit admin themes: .AdminThemeUikit
-Original admin theme: 	.AdminThemeUikitOriginal
-Konkat theme: 					.AdminThemeUikitDefault
+Original admin theme:   .AdminThemeUikitOriginal
+Konkat theme:           .AdminThemeUikitDefault
+Colors for Konkat theme are selected so that they work in light and dark mode
+this could also be used: background-color: light-dark(lightcolor, darkcolor) !important;
 */
 body.AdminThemeUikitDefault {
 	display:block !important;
 	min-height:initial !important;
 	/*font-family: system-ui, sans-serif !important;*/
 }
-
 .AdminThemeUikitDefault input[type=checkbox],
 .AdminThemeUikitDefault input[type=radio] {
 	position: relative !important;
@@ -954,6 +955,12 @@ body.AdminThemeUikitDefault {
 }
 .AdminThemeUikitDefault .fmLink, .AdminThemeUikitDefault .fmLink:active, .AdminThemeUikitDefault .fmLink:visited {
   color: unset !important;
+}
+.AdminThemeUikitDefault .fmMenuTitle {
+	background-color: #7b8a9b !important;
+}
+.AdminThemeUikitDefault .fmMenuItem {
+	color: #354b60 !important;
 }
 
 

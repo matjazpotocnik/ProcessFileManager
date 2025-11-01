@@ -564,12 +564,10 @@ var fmLib = {
 
 			body = document.body;
 			windowHeight = fmTools.getWindowHeight();// - parseInt(getComputedStyle(footer).getPropertyValue('margin-bottom'))
-			console.log("windowHeight="+windowHeight);
 			if(fmContSettings[curCont].adminTheme == 'AdminThemeReno') {
 				body = $$('main');
 				windowHeight = windowHeight - 52;
 			}
-			console.log("windowHeight="+windowHeight);
 			var fmContTable = document.getElementsByClassName('fmContTable')[0];
 			fmContTable.style.display = "none"; // to get the correct height of fmCont
 			for(height = 150; height < 2500; height++) {
@@ -578,7 +576,6 @@ var fmLib = {
 			}
 			fmContTable.style.display = "block";
 			height = height - 2;
-			console.log("heigh="+height);
 			doResize = true;
 		} else {
 			height = fmCont.offsetHeight - 2;
