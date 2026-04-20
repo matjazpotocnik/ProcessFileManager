@@ -1,0 +1,44 @@
+includes:
+    - ../../../vendor/phpstan/phpstan-deprecation-rules/rules.neon
+    - ../../../vendor/phpstan/phpstan/conf/bleedingEdge.neon
+# 
+# run "composer require --dev phpstan/phpstan phpstan/phpstan-deprecation-rules"
+# then add these lines to the composer.json at the web root:
+#
+#    "autoload-dev": {
+#        "classmap": [
+#            "pw.php"
+#        ]
+#    },
+#
+# then run composer dump-autoload
+services:
+    -
+        class: ProcessWirePHPStan\WireMethodReturnTypeExtension
+        tags:
+            - phpstan.broker.dynamicMethodReturnTypeExtension
+parameters:
+    phpVersion: 80500
+    level: 9
+    ignoreErrors:
+        -
+          rawMessages:
+               - 'Method ProcessWire\Session::redirect() invoked with 1 parameter, 0 required.'
+        #-
+          #identifiers:
+              # - unset.possiblyHookedProperty
+              # - varTag.nativeType
+              # - if.alwaysTrue
+              # - ternary.alwaysTrue
+    paths:
+        - ProcessFileManager.module
+    scanDirectories:
+        - ../../../wire/core
+        - ../../../wire/modules
+        - filemanager
+    fileExtensions:
+        - php
+        - module
+        - inc
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: true
