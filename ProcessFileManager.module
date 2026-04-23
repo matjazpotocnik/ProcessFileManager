@@ -72,7 +72,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 	public function init(): void {
 		parent::init();
 
-		$this->configData = array_merge($this->defaults, (array) $this->wire('modules')->getConfig($this));
+		$this->configData = array_merge($this->defaults, (array) $this->wire()->modules->getConfig($this));
 	}
 
 	/**
@@ -224,7 +224,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$f->required = true;
 		$f->addOption('25%', $this->_('Yes'));
 		$f->addOption('0', $this->_('No'));
-		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$f->value = $data[$f->name] ?? $defaults[$f->name];
 		$fields->add($f);
 
 		/** @var InputfieldSelect $f */
@@ -235,7 +235,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$f->required = true;
 		$f->addOption('0', $this->_('Yes'));
 		$f->addOption('1', $this->_('No'));
-		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$f->value = $data[$f->name] ?? $defaults[$f->name];
 		$fields->add($f);
 
 		/** @var InputfieldSelect $f */
@@ -246,7 +246,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$f->required = true;
 		$f->addOption('0', $this->_('Yes'));
 		$f->addOption('1', $this->_('No'));
-		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$f->value = $data[$f->name] ?? $defaults[$f->name];
 		$fields->add($f);
 
 		/** @var InputfieldSelect $f */
@@ -257,7 +257,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$f->required = true;
 		$f->addOption('details', $this->_('Details'));
 		$f->addOption('icons', $this->_('Icons'));
-		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$f->value = $data[$f->name] ?? $defaults[$f->name];
 		$fields->add($f);
 
 		/** @var InputfieldSelect $f */
@@ -277,7 +277,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$f->addOption('pt', 'Português');
 		$f->addOption('ru', 'Русский');
 		$f->addOption('tr', 'Türkçe');
-		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$f->value = $data[$f->name] ?? $defaults[$f->name];
 		$fields->add($f);
 
 		/** @var InputfieldText $f */
@@ -286,7 +286,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$f->label = $this->_('Date/time format:');
 		$f->columnWidth = 34;
 		$f->required = true;
-		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$f->value = $data[$f->name] ?? $defaults[$f->name];
 		$fields->add($f);
 
 		/** @var InputfieldSelect $f */
@@ -296,7 +296,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 		$f->columnWidth = 33;
 		$f->required = true;
 		$f->addOption('codemirror', $this->_('CodeMirror'));
-		$f->value = isset($data[$f->name]) ? $data[$f->name] : $defaults[$f->name];
+		$f->value = $data[$f->name] ?? $defaults[$f->name];
 		$fields->add($f);
 
 		return $fields;
@@ -316,7 +316,7 @@ class ProcessFileManager extends Process implements Module, ConfigurableModule {
 	}
 
 	/**
-	 * Write a message to fileedit.txt using a unified format.
+	 * Write a message to file-manager.txt using a unified format.
 	 *
 	 * @param string $message
 	 * @param string $level

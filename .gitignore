@@ -1,6 +1,8 @@
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
+phpstan*.*
+rector*.*
 
 todo.txt
 filemanager/filemanager.php
